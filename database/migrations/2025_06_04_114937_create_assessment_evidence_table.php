@@ -11,9 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('assessment_evidences', function (Blueprint $table) {
+        Schema::create('assessment_evidences', function (Blueprint $table) { // <--- PASTIKAN NAMA TABEL INI BENAR
             $table->id();
-            $table->foreignId('assessment_score_id')->constrained('assessment_scores')->onDelete('cascade');
+            $table->foreignId('assessment_score_id')->constrained()->onDelete('cascade');
+            // $table->foreignId('assessment_score_id')->constrained('assessment_scores')->onDelete('cascade');
             $table->string('file_path');
             $table->string('original_file_name')->nullable();
             $table->string('file_mime_type')->nullable();

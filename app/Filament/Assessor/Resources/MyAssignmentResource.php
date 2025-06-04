@@ -4,28 +4,28 @@ namespace App\Filament\Assessor\Resources;
 
 use App\Filament\Assessor\Resources\MyAssignmentResource\Pages;
 use App\Models\Assignment;
-use App\Models\Indicator; // Kita akan butuh ini nanti untuk form penilaian
-use App\Models\AssessmentScore; // Untuk menyimpan skor
-use App\Models\Assessor; // Untuk memastikan kita mengambil ID asesor yang benar
+use App\Models\Indicator;
+use App\Models\AssessmentScore;
+use App\Models\Assessor; // Meskipun tidak secara langsung dipakai di form ini, mungkin berguna di tempat lain
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Facades\Auth; // Untuk mendapatkan ID asesor yang login
-use Illuminate\Database\Eloquent\Model; // Untuk type hinting di form
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Database\Eloquent\Model;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\Radio; // Untuk skor jika opsinya sedikit
-use Filament\Forms\Components\Select as FormSelect; // Alias untuk Select Form
+use Filament\Forms\Components\Radio;
+use Filament\Forms\Components\Select as FormSelect;
 use Filament\Forms\Components\FileUpload;
-use Filament\Forms\Get; // Untuk mengambil nilai field lain
-use Filament\Forms\Set; // Untuk mengatur nilai field lain
-use Illuminate\Support\HtmlString; // <--- IMPORT HtmlString
-
-
+use Filament\Forms\Get; // Untuk mengambil nilai field lain di dalam Closure Form
+use Illuminate\Support\HtmlString;
+use Illuminate\Support\Facades\Storage; // Untuk URL bukti
+use Illuminate\Validation\Rules\Unique;
+use Closure;
 
 
 class MyAssignmentResource extends Resource
@@ -35,37 +35,25 @@ class MyAssignmentResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-clipboard-document-list';
     protected static ?string $modelLabel = 'Tugas Penilaian Saya';
     protected static ?string $pluralModelLabel = 'Tugas Penilaian Saya';
-    // protected static ?string $navigationGroup = 'Penilaian'; // Jika Anda ingin grup di panel asesor
 
-    // 1. Hanya tampilkan penugasan untuk asesor yang sedang login
+    public const ACTIVE_STATUSES = ['assigned', 'in_progress'];
+
     public static function getEloquentQuery(): Builder
     {
-        // Pastikan guard 'assessor' aktif dan mengambil ID yang benar
-        // Jika Anda mengonfigurasi guard 'assessor' sebagai default untuk panel ini, Auth::id() mungkin cukup.
-        // Jika tidak, gunakan Auth::guard('assessor')->id()
         $assessorId = Auth::guard('assessor')->id();
-        if (!$assessorId && app()->environment('local')) {
-            // Fallback untuk development jika login asesor belum sempurna,
-            // atau jika ingin melihat semua saat development. Hapus atau sesuaikan untuk produksi.
-            // $assessor = Assessor::first(); // Ambil asesor pertama sebagai contoh
-            // if ($assessor) $assessorId = $assessor->id;
-        }
-        
+        // Fallback sederhana jika assessorId null saat development (HAPUS ATAU SESUAIKAN DI PRODUKSI)
+        // if (!$assessorId && app()->environment('local')) {
+        //     $firstAssessor = Assessor::first();
+        //     if ($firstAssessor) $assessorId = $firstAssessor->id;
+        //     \Illuminate\Support\Facades\Log::warning("[MyAssignmentResource] Fallback: Menggunakan Assessor ID: {$assessorId} untuk query.");
+        // }
         return parent::getEloquentQuery()->where('assessor_id', $assessorId);
     }
 
-    // 2. Asesor tidak bisa membuat penugasan baru dari panel mereka
     public static function canCreate(): bool
     {
         return false;
     }
-
-    // 3. Asesor tidak bisa menghapus penugasan (biasanya)
-    // Anda bisa override canDelete() atau canForceDelete() jika perlu
-    // public static function canDelete(Model $record): bool
-    // {
-    //     return false;
-    // }
 
     public static function form(Form $form): Form
     {
@@ -73,30 +61,25 @@ class MyAssignmentResource extends Resource
             ->schema([
                 Forms\Components\Section::make('Detail Tugas')
                     ->columns(2)
-                    ->disabled(fn(string $operation) => $operation === 'view') // Disable semua di section ini saat view
+                    ->disabled(fn(string $operation) => $operation === 'view')
                     ->schema([
                         Placeholder::make('location_name')
                             ->label('Lokasi yang Dinilai')
-                            ->content(fn (?Assignment $record): string => $record?->location->name ?? '-'),
+                            ->content(fn (Assignment $record): string => $record?->location->name ?? '-'),
                         Placeholder::make('location_type')
                             ->label('Tipe Lokasi')
-                            ->content(fn (?Assignment $record): string => $record?->location->location_type ?? '-'),
-                        Placeholder::make('assignment_date_display') // Ganti nama agar tidak konflik jika ada field 'assignment_date'
+                            ->content(fn (Assignment $record): string => $record?->location->location_type ?? '-'),
+                        Placeholder::make('assignment_date_display')
                             ->label('Tanggal Penugasan')
                             ->content(fn (?Assignment $record): string => $record?->assignment_date?->translatedFormat('d M Y') ?? '-'),
                         Placeholder::make('due_date_display')
                             ->label('Batas Waktu Penilaian')
                             ->content(fn (?Assignment $record): string => $record?->due_date?->translatedFormat('d M Y') ?? '-'),
-                        // Asesor mungkin bisa mengubah status tugasnya ke 'in_progress'
                         FormSelect::make('status')
-                            ->options([
-                                // 'assigned' => 'Ditugaskan', // Mungkin tidak diubah oleh asesor
-                                'in_progress' => 'Sedang Dikerjakan',
-                                // Status 'completed' akan dihandle oleh tombol submit khusus
-                            ])
-                            ->label('Status Tugas Saat Ini')
+                            ->label('Ubah Status Tugas Menjadi:')
+                            ->options(['in_progress' => 'Sedang Dikerjakan'])
                             ->visible(fn (string $operation, ?Assignment $record): bool => $operation === 'edit' && $record?->status === 'assigned')
-                            ->helperText('Ubah status menjadi "Sedang Dikerjakan" jika Anda memulai penilaian.'),
+                            ->helperText('Pilih "Sedang Dikerjakan" jika Anda memulai penilaian ini.'),
                         Placeholder::make('current_status_display')
                             ->label('Status Tugas Saat Ini')
                             ->content(fn (?Assignment $record): string => ucfirst(str_replace('_', ' ', $record?->status ?? 'assigned')))
@@ -105,91 +88,111 @@ class MyAssignmentResource extends Resource
                             ->label('Catatan Umum Penugasan (dari Admin)')
                             ->disabled()
                             ->columnSpanFull()
-                            ->visible(fn(string $operation, $state) => !empty($state)), // Hanya tampil jika ada isinya
+                            ->visible(fn(string $operation, $state) => !empty($state)),
                     ]),
 
                 Forms\Components\Section::make('Penilaian Indikator')
                     ->description('Isi skor, catatan, dan unggah bukti untuk setiap indikator yang relevan.')
-                    ->visible(fn (string $operation): bool => $operation === 'edit') // Hanya tampil di mode edit
+                    ->visible(fn (string $operation): bool => $operation === 'edit')
                     ->schema([
-                        Repeater::make('indicator_scores')
+                        Repeater::make('indicator_scores_repeater') // Nama yang akan digunakan di mutateFormDataBeforeFill dan handleRecordUpdate
                             ->label(false)
-                            ->relationship('assessmentScores') // Ini penting
+                            // TIDAK menggunakan ->relationship() agar kita bisa kelola data secara manual
+                            // Ini memungkinkan kita menampilkan semua indikator relevan, bukan hanya yang sudah punya AssessmentScore
                             ->addable(false)
                             ->deletable(false)
                             ->reorderable(false)
-                            ->schema([ // Skema untuk setiap item (setiap AssessmentScore)
-                                Placeholder::make('indicator_name')
-                                    ->label('Indikator')
-                                    ->content(fn (?AssessmentScore $record): string => $record?->indicator->name ?? 'Indikator tidak ditemukan'),
+                            ->columns(1)
+                            ->grid(1)
+                            ->itemLabel(function (array $state): ?string {
+                                // $state adalah data untuk satu item repeater
+                                $indicatorId = $state['indicator_id'] ?? null;
+                                if ($indicatorId) {
+                                    $indicator = Indicator::find($indicatorId);
+                                    return $indicator?->name ?? 'Indikator Tidak Ditemukan';
+                                }
+                                return 'Indikator Baru';
+                            })
+                            ->schema([
+                                Forms\Components\Hidden::make('indicator_id'), // Untuk menyimpan ID Indikator
+                                Forms\Components\Hidden::make('assessment_score_id'), // Untuk menyimpan ID AssessmentScore jika sudah ada
 
-                                    Placeholder::make('indicator_details')
+                                Placeholder::make('indicator_display')
                                     ->label(false)
                                     ->columnSpanFull()
-                                    ->content(function (?AssessmentScore $record): ?HtmlString { // Return type diubah ke ?HtmlString
-                                        if (!$record || !$record->indicator) {
-                                            return null; // Kembalikan null jika tidak ada data
-                                        }
-                                        $indicator = $record->indicator;
-                                        $htmlOutput = '';
-                                        if ($indicator->category) {
-                                            $htmlOutput .= "<div><strong>Kategori:</strong> " . e($indicator->category) . "</div>";
-                                        }
-                                        if ($indicator->keywords) {
-                                            $htmlOutput .= "<div><strong>Kata Kunci:</strong> " . e($indicator->keywords) . "</div>";
-                                        }
-                                        if ($indicator->measurement_method) {
-                                            $htmlOutput .= "<div><strong>Cara Pengukuran:</strong> " . e($indicator->measurement_method) . "</div>";
-                                        }
+                                    ->content(function (Get $get): ?HtmlString {
+                                        $indicatorId = $get('indicator_id');
+                                        if (!$indicatorId) return null;
+                                        $indicator = Indicator::find($indicatorId);
+                                        if (!$indicator) return new HtmlString('<div>Indikator tidak valid atau tidak ditemukan.</div>');
+
+                                        $htmlOutput = "<div class='mb-2'><strong>Indikator:</strong> " . e($indicator->name) . "</div>";
+                                        if ($indicator->category) $htmlOutput .= "<div><strong>Kategori:</strong> " . e($indicator->category) . "</div>";
+                                        if ($indicator->keywords) $htmlOutput .= "<div><strong>Kata Kunci:</strong> " . e($indicator->keywords) . "</div>";
+                                        if ($indicator->measurement_method) $htmlOutput .= "<div><strong>Cara Pengukuran:</strong> " . e($indicator->measurement_method) . "</div>";
                                         if ($indicator->scoring_criteria_text) {
-                                            // Gunakan e() untuk data, nl2br() aman untuk output HTML yang diinginkan
                                             $htmlOutput .= "<div class='mt-2 p-2 border rounded bg-gray-50 dark:bg-gray-800 dark:border-gray-700'><strong>Kriteria Penilaian:</strong><br>" . nl2br(e($indicator->scoring_criteria_text)) . "</div>";
                                         }
-                                        
-                                        if (empty($htmlOutput)) {
-                                            return null; // Kembalikan null jika tidak ada konten untuk ditampilkan
-                                        }
-                                        return new HtmlString($htmlOutput); // <--- Bungkus dengan HtmlString
+                                        return new HtmlString($htmlOutput);
                                     }),
 
-                                // Input Skor berdasarkan Tipe Skala Indikator
-                                Forms\Components\Radio::make('score')
-                                    ->label('Skor')
-                                    ->options(function (?AssessmentScore $record): array {
-                                        // Logika untuk membuat opsi radio button berdasarkan indicator->scale_type atau scoring_criteria_text
-                                        // Contoh sederhana untuk skala numerik
-                                        if ($record && $record->indicator && str_starts_with(strtolower($record->indicator->scale_type ?? ''), 'skala ')) {
-                                            // Misal scale_type "Skala 1-3" atau "Skala 1-5"
-                                            $parts = explode('-', str_replace('Skala ', '', $record->indicator->scale_type));
-                                            if (count($parts) === 2 && is_numeric($parts[0]) && is_numeric($parts[1])) {
-                                                return array_combine(range((int)$parts[0], (int)$parts[1]), range((int)$parts[0], (int)$parts[1]));
+                                Radio::make('score')
+                                    ->label('Skor Pilihan')
+                                    ->options(function (Get $get): array {
+                                        $indicatorId = $get('indicator_id');
+                                        if (!$indicatorId) return ['0' => 'N/A'];
+                                        $indicator = Indicator::find($indicatorId);
+                                        if ($indicator && $indicator->scale_type) {
+                                            $scaleType = strtolower($indicator->scale_type);
+                                            if (str_starts_with($scaleType, 'skala ')) {
+                                                $parts = explode('-', str_replace('skala ', '', $scaleType));
+                                                if (count($parts) === 2 && is_numeric($parts[0]) && is_numeric($parts[1])) {
+                                                    $range = range((int)$parts[0], (int)$parts[1]);
+                                                    $options = [];
+                                                    foreach ($range as $value) {
+                                                        $options[(string)$value] = (string)$value; // Value dan Label adalah angka skor
+                                                    }
+                                                    return $options;
+                                                }
+                                            } elseif ($scaleType === 'ya/tidak') {
+                                                return ['1' => 'Ya', '0' => 'Tidak']; // Simpan sebagai 1 atau 0
+                                            } elseif ($scaleType === 'ada/tidak ada') {
+                                                return ['1' => 'Ada', '0' => 'Tidak Ada'];
                                             }
+                                            // TODO: Tambahkan parsing untuk 'Kustom' jika scoring_criteria_text punya format baku dan bisa diparsing menjadi opsi
+                                            // Sementara, jika 'Kustom', asesor bisa input manual jika field diubah jadi TextInput, atau kita sediakan opsi umum.
                                         }
-                                        // Default atau jika tipe skala lain
-                                        return [ '1' => '1', '2' => '2', '3' => '3', '4' => '4', '5' => '5']; // Sesuaikan
+                                        // Fallback jika tidak ada scale_type atau tidak dikenali
+                                        return ['1' => '1', '2' => '2', '3' => '3', '4' => '4', '5' => '5', '0' => 'N/A'];
                                     })
-                                    ->required() // Setiap indikator harus diberi skor
-                                    ->inline()
-                                    ->inlineLabel(false),
+                                    // ->required() // Validasi kelengkapan akan dilakukan saat "Selesaikan Penilaian"
+                                    ->inline()->inlineLabel(false),
 
                                 Textarea::make('assessor_notes')
                                     ->label('Catatan Asesor untuk Indikator Ini')
-                                    ->rows(3)
-                                    ->columnSpanFull(),
+                                    ->rows(3)->columnSpanFull(),
 
-                                FileUpload::make('evidences') // Akan menjadi array file jika multiple
-                                    ->label('Unggah Bukti Pendukung')
+                                FileUpload::make('evidences_upload')
+                                    ->label('Unggah Bukti Baru')
                                     ->multiple()
-                                    ->directory(fn(?AssessmentScore $record) => $record ? "assessment-evidences/{$record->assignment_id}/{$record->id}" : "assessment-evidences-temp")
+                                    ->directory(function (Get $get, Model $record) { // $record di sini adalah Assignment
+                                        $assignmentId = $record?->id;
+                                        $assessmentScoreId = $get('assessment_score_id'); // ID AssessmentScore dari item repeater ini
+                                        return ($assignmentId && $assessmentScoreId) ? "assessment-evidences/{$assignmentId}/{$assessmentScoreId}" : "assessment-evidences-temp/" . uniqid();
+                                    })
                                     ->reorderable()
-                                    ->appendFiles() // Penting jika asesor mengedit dan menambah file
-                                    // ->relationship('evidences') // Relasi AssessmentScore ke AssessmentEvidence. Ini perlu setup khusus untuk repeater.
-                                    // Untuk FileUpload dalam repeater yang menyimpan ke tabel terpisah, biasanya perlu custom save logic.
-                                    ->helperText('Anda bisa mengunggah beberapa file jika perlu.')
+                                    ->appendFiles() // Biarkan ini aktif agar bisa manage file lama dan baru
+                                    ->helperText('File yang sudah ada akan tetap tersimpan kecuali dihapus dari daftar ini. File baru akan ditambahkan.')
                                     ->columnSpanFull(),
-                            ])
-                            ->columns(1) // Setiap item repeater (indikator) menggunakan 1 kolom penuh
-                            ->grid(1), // Pastikan grid untuk repeater item
+                                
+                                // Placeholder untuk menampilkan bukti yang sudah ada dan opsi menghapusnya
+                                // Ini adalah bagian yang lebih kompleks untuk diintegrasikan dengan state FileUpload
+                                // Solusi sebelumnya dengan checkbox HTML manual adalah salah satu cara.
+                                // Filament v3 mungkin memiliki cara yang lebih baik untuk menangani ini di dalam FileUpload.
+                                // Untuk saat ini, fokus pada upload dan penyimpanan dasar.
+                                // Jika FileUpload dengan appendFiles berfungsi baik, ia akan menampilkan file lama
+                                // dan user bisa menghapusnya dari komponen FileUpload itu sendiri.
+                            ]),
                     ])
             ]);
     }
@@ -198,30 +201,17 @@ class MyAssignmentResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('location.name')
-                    ->label('Lokasi')
-                    ->searchable()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('assignment_date')
-                    ->label('Tgl Penugasan')
-                    ->date('d M Y')
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('due_date')
-                    ->label('Batas Waktu')
-                    ->date('d M Y')
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('status')
-                    ->label('Status')
-                    ->badge()
+                Tables\Columns\TextColumn::make('location.name')->label('Lokasi')->searchable()->sortable(),
+                Tables\Columns\TextColumn::make('assignment_date')->label('Tgl Penugasan')->date('d M Y')->sortable(),
+                Tables\Columns\TextColumn::make('due_date')->label('Batas Waktu')->date('d M Y')->sortable(),
+                Tables\Columns\TextColumn::make('status')->label('Status')->badge()
                     ->color(fn (string $state): string => match ($state) {
                         'assigned' => 'primary',
                         'in_progress' => 'warning',
                         'completed' => 'success',
                         'cancelled' => 'danger',
                         default => 'gray',
-                    })
-                    ->searchable()
-                    ->sortable(),
+                    })->searchable()->sortable(),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('status')
@@ -233,37 +223,26 @@ class MyAssignmentResource extends Resource
                     ])->label('Status'),
             ])
             ->actions([
-                // Aksi "Lakukan Penilaian" akan mengarah ke halaman edit resource ini
                 Tables\Actions\Action::make('assess')
-                    ->label('Mulai/Lanjutkan Penilaian')
-                    ->icon('heroicon-o-pencil-square')
+                    ->label('Mulai/Lanjutkan Penilaian')->icon('heroicon-o-pencil-square')
                     ->url(fn (Assignment $record): string => static::getUrl('edit', ['record' => $record]))
-                    // Hanya aktif jika statusnya memungkinkan untuk dinilai
-                    ->visible(fn (Assignment $record): bool => in_array($record->status, ['assigned', 'in_progress'])),
-                Tables\Actions\ViewAction::make()
-                    ->label('Lihat Detail Tugas'), // Halaman view akan menggunakan form() yang sama tapi disabled
+                    ->visible(fn (Assignment $record): bool => in_array($record->status, self::ACTIVE_STATUSES)),
+                Tables\Actions\ViewAction::make()->label('Lihat Detail Tugas'),
             ])
-            ->bulkActions([
-                // Biasanya tidak ada bulk actions untuk asesor di daftar tugasnya
-            ])
-            ->defaultSort('due_date', 'asc'); // Urutkan berdasarkan batas waktu terdekat
+            ->bulkActions([])
+            ->defaultSort('due_date', 'asc');
     }
 
     public static function getRelations(): array
     {
-        return [
-            // Tidak ada relation manager standar di sini untuk asesor
-        ];
+        return [];
     }
 
     public static function getPages(): array
     {
-        // Sesuaikan nama class Pages dengan yang digenerate oleh Filament
-        // Biasanya ada di App\Filament\Assessor\Resources\MyAssignmentResource\Pages
         return [
             'index' => Pages\ListMyAssignments::route('/'),
-            // 'create' => Pages\CreateMyAssignment::route('/create'), // Sudah di-disable via canCreate()
-            'edit' => Pages\EditMyAssignment::route('/{record}/edit'), // Ini akan jadi halaman utama penilaian
+            'edit' => Pages\EditMyAssignment::route('/{record}/edit'),
             // 'view' => Pages\ViewMyAssignment::route('/{record}'),
         ];
     }

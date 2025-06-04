@@ -1,0 +1,139 @@
+<?php
+
+namespace App\Filament\Admin\Resources;
+
+use App\Filament\Admin\Resources\PenugasanResource\Pages;
+use App\Filament\Admin\Resources\PenugasanResource\RelationManagers;
+use App\Models\City; // Model utama resource ini
+use App\Models\Assignment; // Digunakan oleh relasi dan kolom kustom
+use App\Models\Country; // Untuk relasi City ke Country
+use App\Models\Assessor; // Untuk relasi City ke Assessor
+use Filament\Forms;
+use Filament\Forms\Form;
+use Filament\Resources\Resource;
+use Filament\Tables;
+use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Str; // Untuk Str::limit
+
+class PenugasanResource extends Resource
+{
+    protected static ?string $model = City::class; // <-- Kunci: Model adalah City
+
+    protected static ?string $navigationIcon = 'heroicon-o-briefcase';
+    protected static ?string $navigationLabel = 'Data Penugasan Kota';
+    protected static ?string $navigationGroup = 'Operasional';
+    protected static ?string $slug = 'data-penugasan-kota';
+
+    public static function form(Form $form): Form
+    {
+        // Formulir ini untuk Edit Kota & mengelola asesornya via Relation Manager
+        return $form
+            ->schema([
+                Forms\Components\Section::make('Detail Kota')
+                    ->schema([
+                        Forms\Components\TextInput::make('name')
+                            ->label('Nama Kota')
+                            ->disabled()
+                            ->columnSpanFull(),
+                        Forms\Components\Select::make('country_id')
+                            ->relationship('country', 'name') // Pastikan relasi country() ada di model City
+                            ->label('Negara')
+                            ->disabled(),
+                    ])->columns(2), // Sesuaikan layout jika perlu
+                // Relation Manager 'AssignmentsRelationManager' akan muncul di sini
+                // saat halaman edit untuk mengatur detail assignment_date & description per asesor
+            ]);
+    }
+
+    public static function table(Table $table): Table
+    {
+        return $table
+            ->columns([
+                Tables\Columns\TextColumn::make('name')
+                    ->label('Kota')
+                    ->searchable()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('country.name') // Relasi: City->country->name
+                    ->label('Negara')
+                    ->searchable()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+
+                Tables\Columns\TextColumn::make('assessors_display') // Kolom kustom baru
+                    ->label('Asesor Ditugaskan')
+                    ->formatStateUsing(function (City $record): string {
+                        // Mengambil asesor melalui relasi 'assessors' (BelongsToMany) di model City
+                        // atau melalui relasi 'assignments' (HasMany) jika Anda ingin lebih banyak detail dari pivot
+                        if ($record->assessors->isEmpty()) { // Asumsi ada relasi assessors() di City
+                            return 'Belum ada';
+                        }
+                        // Ambil maksimal 3 nama asesor
+                        return $record->assessors->take(3)->pluck('name')->implode(', ');
+                    })
+                    ->searchable(query: function (Builder $query, string $search): Builder {
+                        // Pencarian pada nama asesor
+                        return $query->whereHas('assessors', function (Builder $assessorQuery) use ($search) {
+                            $assessorQuery->where('name', 'like', "%{$search}%");
+                        });
+                    }),
+
+                Tables\Columns\TextColumn::make('assignments_summary_with_date') // Kolom kustom untuk detail
+                    ->label('Detail Penugasan (Max 3 Tampil)')
+                    ->listWithLineBreaks() // Membuat setiap item di baris baru
+                    ->formatStateUsing(function (City $record): array {
+                        if ($record->assignments->isEmpty()) {
+                            return ['Belum ada'];
+                        }
+                        // Ambil detail dari maksimal 3 assignment pertama (atau terbaru)
+                        // Anda bisa sesuaikan urutan jika perlu, misal orderBy('assignment_date', 'desc')
+                        return $record->assignments->take(3)->map(function (Assignment $assignment) {
+                            $assessorName = $assignment->assessor?->name ?? 'N/A';
+                            $date = $assignment->assignment_date ? $assignment->assignment_date->format('d M Y') : 'Tanpa Tgl.';
+                            // $desc = $assignment->description ? Str::limit($assignment->description, 20) : '-';
+                            // return "{$assessorName} ({$date}, {$desc})";
+                            return "{$assessorName} ({$date})"; // Versi lebih ringkas untuk tabel
+                        })->all(); // Kembalikan sebagai array string
+                    })
+                    ->toggleable(isToggledHiddenByDefault: true), // Sembunyikan defaultnya jika terlalu ramai
+
+
+                Tables\Columns\TextColumn::make('assessors_count')
+                    ->counts('assessors') // Nama relasi BelongsToMany di model City
+                    ->label('Jml. Asesor')
+                    ->sortable(),
+            ])
+            ->filters([
+                Tables\Filters\SelectFilter::make('country')
+                    ->relationship('country', 'name')
+                    ->label('Filter Negara'),
+            ])
+            ->actions([
+                Tables\Actions\EditAction::make()->label('Atur Penugasan'), // Mengedit City & assignments via RM
+                Tables\Actions\DeleteAction::make(), // Menghapus City
+            ])
+            ->bulkActions([
+                Tables\Actions\BulkActionGroup::make([
+                    Tables\Actions\DeleteBulkAction::make(),
+                ]),
+            ]);
+    }
+
+    public static function getRelations(): array
+    {
+        // Relation Manager untuk mengelola Assignment (link city-assessor + pivot data)
+        return [
+            RelationManagers\AssignmentsRelationManager::class,
+        ];
+    }
+
+    public static function getPages(): array
+    {
+        return [
+            'index' => Pages\ListPenugasans::route('/'),
+            // Tombol 'Create' standar akan membuat City baru.
+            // Kita akan menggunakan action kustom di header ListPenugasans untuk batch assignment.
+            'edit' => Pages\EditPenugasan::route('/{record}/edit'),
+        ];
+    }
+}

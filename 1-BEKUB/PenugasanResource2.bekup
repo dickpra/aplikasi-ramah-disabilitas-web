@@ -1,0 +1,248 @@
+<?php
+
+namespace App\Filament\Resources;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Textarea;
+use App\Filament\Resources\PenugasanResource\Pages;
+use App\Filament\Resources\PenugasanResource\RelationManagers;
+use App\Models\Assignment;
+use App\Models\Assessor;    
+use Filament\Forms;
+use Filament\Forms\Form;
+use Filament\Resources\Resource;
+use Filament\Tables;
+use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Closure;
+use Filament\Forms\Get; // <--- PASTIKAN INI ADA DAN BENAR
+use Filament\Forms\Set;
+use App\Models\City; // Jika belum ada
+
+class PenugasanResource extends Resource
+{
+    // protected static ?string $model = Assignment::class;
+    protected static ?string $model = \App\Models\City::class;
+
+    protected static ?string $navigationIcon = 'heroicon-o-document-check'; // Icon untuk penugasan
+    protected static ?string $navigationLabel = 'Data Penugasan-bekub';
+    protected static ?string $navigationGroup = 'Operasional'; // Atau grup lain yang sesuai
+    protected static ?string $slug = 'data-penugasan';
+
+    public static function form(Form $form): Form
+{
+    return $form
+        ->schema([
+            Forms\Components\Select::make('city_id')
+                // ->relationship('city', 'name')
+                ->options(City::pluck('name', 'id'))
+                ->label('Kota')
+                ->searchable()
+                ->preload()
+                ->required()
+                ->live(onBlur: true) // Atau cukup reactive()
+                // ->disabled(fn (string $operation) => $operation === 'edit') // Opsional: nonaktifkan penggantian kota saat edit
+                ->afterStateUpdated(function (string $operation, Set $set, Get $get, ?Assignment $record) {
+                    // Jika kota diubah saat edit, asesor_id mungkin perlu di-reset atau divalidasi ulang
+                    // Untuk edit, umumnya city_id tidak diubah, atau jika diubah, logicnya kompleks.
+                    // Saat ini, kita asumsikan city_id bisa diubah, tapi asesor yang dipilih harus valid untuk kota baru.
+                    if ($operation === 'edit') {
+                        $set('assessor_id', null); // Kosongkan asesor jika kota diubah
+                    }
+                }),
+            // Forms\Components\Select::make('city_id')
+            //     ->relationship('city', 'name')
+            //     ->label('Kota')
+            //     ->searchable()
+            //     ->preload()
+            //     ->required()
+            //     ->live(onBlur: true) // Atau cukup reactive()
+            //     // ->disabled(fn (string $operation) => $operation === 'edit') // Opsional: nonaktifkan penggantian kota saat edit
+            //     ->afterStateUpdated(function (string $operation, Set $set, Get $get, ?Assignment $record) {
+            //         // Jika kota diubah saat edit, asesor_id mungkin perlu di-reset atau divalidasi ulang
+            //         // Untuk edit, umumnya city_id tidak diubah, atau jika diubah, logicnya kompleks.
+            //         // Saat ini, kita asumsikan city_id bisa diubah, tapi asesor yang dipilih harus valid untuk kota baru.
+            //         if ($operation === 'edit') {
+            //             $set('assessor_id', null); // Kosongkan asesor jika kota diubah
+            //         }
+            //     }),
+
+            DatePicker::make('assignment_date') // Field Tanggal Penugasan
+                ->label('Tanggal Penugasan')
+                ->required()
+                ->default(now()), // Default tanggal hari ini
+    
+            Textarea::make('description') // Field Keterangan
+                ->label('Keterangan/Kebutuhan')
+                ->nullable()
+                ->rows(3),
+
+            Forms\Components\Select::make('assessor_id')
+                ->label('Pilih Asesor (Maksimal 3 Asesor)')
+                ->options(Assessor::pluck('name'))
+                ->multiple()
+                ->maxItems(3)
+                ->options(
+                    
+                    function (Get $get, ?Assignment $recordToEdit): array {
+                    $cityId = $get('city_id');
+                    $options = [];
+                    $assignedAssessorIds = \App\Models\Assignment::where('city_id', $cityId)
+                                ->pluck('assessor_id')
+                                ->all();
+                    return \App\Models\Assessor::whereNotIn('id', $assignedAssessorIds)
+                                ->pluck('name', 'id')
+                                ->all();
+
+                    if (!$cityId) {
+                        return []; // Tunggu kota dipilih
+                    }
+
+                    // 1. Tambahkan asesor yang sedang diedit saat ini (jika ada)
+                    if ($recordToEdit && $recordToEdit->assessor_id && $recordToEdit->city_id == $cityId) {
+                        // Pastikan asesor yang sedang diedit memang ada
+                        $currentAssessor = Assessor::find($recordToEdit->assessor_id);
+                        if ($currentAssessor) {
+                            $options[$currentAssessor->id] = $currentAssessor->name;
+                        }
+                    }
+
+                    // 2. Tambahkan asesor lain yang belum ditugaskan ke kota ini
+                    $availableAssessors = Assessor::whereDoesntHave('assignments', function (Builder $query) use ($cityId) {
+                        $query->where('city_id', $cityId);
+                    })->get();
+
+                    foreach ($availableAssessors as $assessor) {
+                        // Pastikan tidak duplikat dengan yang sudah ditambahkan (currentAssessor)
+                        if (!array_key_exists($assessor->id, $options)) {
+                            $options[$assessor->id] = $assessor->name;
+                        }
+                    }
+                    return $options;
+                })
+                ->searchable()
+                // ->preload() // Preload mungkin tidak ideal dengan options dinamis yang kompleks
+                ->required()
+                ->rules([ // Aturan validasi custom yang sudah ada sebelumnya untuk edit
+                    static fn (Forms\Get $get, ?Assignment $record): Closure => function (string $attribute, $value, Closure $fail) use ($get, $record) {
+                        $cityId = $get('city_id');
+                        $assessorId = $value;
+
+                        if (!$cityId || !$assessorId) return;
+
+                        // Cek duplikasi (jika ini bukan record yang sama)
+                        $query = Assignment::where('city_id', $cityId)->where('assessor_id', $assessorId);
+                        if ($record) {
+                            $query->where('id', '!=', $record->id);
+                        }
+                        if ($query->exists()) {
+                            $fail('Kombinasi asesor dan kota ini sudah ada di penugasan lain.');
+                            return;
+                        }
+
+                        // Cek batasan maksimal 3 asesor per kota (tidak termasuk diri sendiri jika city & assessor tidak berubah)
+                        $assignmentsForCityQuery = Assignment::where('city_id', $cityId);
+                        if ($record) {
+                             // Jika kita mengganti asesor untuk kota yang sama, atau mengganti kota,
+                             // kita perlu memastikan penambahan asesor baru ini tidak melebihi batas.
+                             // Record yang sedang diedit tidak dihitung jika ia akan diubah/dipindahkan.
+                            $assignmentsForCityQuery->where('id', '!=', $record->id);
+                        }
+
+                        $currentAssignedCount = $assignmentsForCityQuery->count();
+                        if ($currentAssignedCount >= 3) {
+                            $fail('Kota ini sudah memiliki 3 asesor (tidak termasuk penugasan saat ini jika tidak diubah). Tidak dapat menugaskan lebih dari 3 asesor.');
+                        }
+                    },
+                ]),
+        ]);
+}
+
+
+    public static function table(Table $table): Table
+    {
+        return $table
+            ->columns([
+                TextColumn::make('assessor.name')->label('Asesor')->limitList(3),
+                Tables\Columns\TextColumn::make('city.name')
+                    ->label('Kota')
+                    ->searchable()
+                    ->sortable(),
+                // Tables\Columns\TextColumn::make('assessor.name')
+                //     ->label('Asesor Ditugaskan')
+                //     ->searchable()
+                //     ->sortable(),
+                
+                Tables\Columns\TextColumn::make('assignment_date') // Kolom baru
+                ->date() // Format sebagai tanggal
+                ->label('Tanggal Penugasan')
+                ->sortable(),
+                Tables\Columns\TextColumn::make('description') // Kolom baru
+                ->label('Keterangan')
+                ->limit(40) // Batasi panjang teks di tabel
+                ->tooltip(fn (?Assignment $record) => $record?->description) // Tampilkan penuh saat hover
+                ->toggleable(isToggledHiddenByDefault: true), // Bisa disembunyikan/ditampilkan
+            // Tables\Columns\TextColumn::make('created_at') // Bisa dihapus jika 'assignment_date' lebih relevan
+            //     ->label('Tanggal Input')
+            //     ->dateTime()
+            //     ->sortable(),
+            ])
+            
+            // ->columns([
+            //     Tables\Columns\TextColumn::make('name')
+            //         ->label('Kota')
+            //         ->searchable()
+            //         ->sortable(),
+            //     Tables\Columns\TextColumn::make('country.name') // Asumsi ada relasi 'country' di model City
+            //         ->label('Negara')
+            //         ->searchable()
+            //         ->sortable(),
+            //     Tables\Columns\TextColumn::make('assessors.name')
+            //         ->label('Asesor Ditugaskan')
+            //         ->badge()
+            //         // ->default('Belum ada') // Menangani kasus jika tidak ada asesor
+            //         ->searchable(),
+            //     // Opsi 1: Tanggal Penugasan Terakhir (memakai accessor)
+            //     Tables\Columns\TextColumn::make('latest_assignment_date')
+            //         ->label('Penugasan Terakhir')
+            //         ->dateTime()
+            //         ->sortable(),
+            //     // Opsi 2: Jumlah Asesor (jika tanggal tidak terlalu penting di view ini)
+            //     Tables\Columns\TextColumn::make('assessors_count')
+            //         ->counts('assessors')
+            //         ->label('Jumlah Asesor')
+            //         ->sortable(),
+            // ])
+            
+            ->filters([
+                // Filter berdasarkan kota atau asesor bisa ditambahkan di sini
+            ])
+            ->actions([
+                Tables\Actions\EditAction::make(),
+                // Tables\Actions\EditAction::make()->label('Atur Penugasan')
+                Tables\Actions\DeleteAction::make(), // Menghapus satu link penugasan
+            ])
+            ->bulkActions([
+                Tables\Actions\BulkActionGroup::make([
+                    Tables\Actions\DeleteBulkAction::make(),
+                ]),
+            ]);
+    }
+
+    public static function getRelations(): array
+    {
+        return [
+            RelationManagers\AssignmentsRelationManager::class,
+        ];
+    }
+
+    public static function getPages(): array
+    {
+        return [
+            'index' => Pages\ListPenugasans::route('/'),
+            'create' => Pages\CreatePenugasan::route('/create'),
+            'edit' => Pages\EditPenugasan::route('/{record}/edit'),
+        ];
+    }
+}

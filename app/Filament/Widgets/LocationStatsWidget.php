@@ -16,10 +16,8 @@ class LocationStatsWidget extends BaseWidget
         $assessedLocations = Location::whereHas('assignments', function ($query) {
             $query->where('status', 'approved');
         })->get();
-        
 
         $totalAssessed = $assessedLocations->count();
-        $ranks = $assessedLocations->map(fn ($location) => $location->final_assessment['rank'] ?? null)->filter();
 
         $averageScore = 0;
         if ($totalAssessed > 0) {
@@ -27,8 +25,10 @@ class LocationStatsWidget extends BaseWidget
             $averageScore = round($totalScore / $totalAssessed, 2);
         }
 
+        // --- Logika baru untuk menghitung penilaian yang belum selesai ---
+        $unfinishedAssignments = Assignment::whereIn('status', ['assigned', 'in_progress'])->count();
+        
         $assessorsCount = Assessor::count();
-
 
         return [
             Stat::make('Total Lokasi Dinilai', $totalAssessed)
@@ -39,15 +39,17 @@ class LocationStatsWidget extends BaseWidget
                 ->description('Rata-rata dari semua skor akhir lokasi')
                 ->descriptionIcon('heroicon-m-calculator')
                 ->color('info'),
-            Stat::make('Peringkat GOLD Terbanyak', $ranks->where('rank', '==', 'GOLD')->count())
-                ->description('Jumlah lokasi yang mencapai peringkat GOLD')
-                ->descriptionIcon('heroicon-m-sparkles')
-                ->color('warning'),
-            Stat::make('Jumlah Assesor', $assessorsCount)
-                ->description('Jumlah Assesor Aktif')
+
+            // --- KARTU STATISTIK YANG DIGANTI ---
+            Stat::make('Penilaian Belum Selesai', $unfinishedAssignments)
+                ->description('Jumlah tugas yang masih aktif atau sedang dikerjakan')
+                ->descriptionIcon('heroicon-m-clock')
+                ->color('danger'),
+
+            Stat::make('Jumlah Asesor', $assessorsCount)
+                ->description('Total asesor yang terdaftar')
                 ->descriptionIcon('heroicon-m-user-group')
-                ->color('danger')
-                // ->value(Assessor::count()),
+                ->color('warning'),
         ];
     }
 }

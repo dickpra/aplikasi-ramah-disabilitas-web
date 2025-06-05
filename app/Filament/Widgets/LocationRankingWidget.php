@@ -20,7 +20,12 @@ class LocationRankingWidget extends BaseWidget
             ->defaultSort('final_score', 'desc') // <-- SEKARANG BISA DI-SORTING!
             ->columns([
                 Tables\Columns\TextColumn::make('name')->searchable()->label('Nama Lokasi'),
+                Tables\Columns\TextColumn::make('province.country.name')
+                    ->searchable()
+                    ->sortable()
+                    ->label('Negara'),
                 Tables\Columns\TextColumn::make('province.name')->searchable()->label('Provinsi'),
+                // Tables\Columns\TextColumn::make('country.name')->searchable()->label('Negara'),
 
                 // Gunakan kolom fisik, bukan accessor lagi
                 Tables\Columns\TextColumn::make('final_score')

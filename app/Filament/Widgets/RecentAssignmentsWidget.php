@@ -21,7 +21,7 @@ class RecentAssignmentsWidget extends BaseWidget
         return $table
             // Mengambil data assignment, diurutkan berdasarkan kapan terakhir di-update
             ->query(Assignment::query()->latest('updated_at')->limit(5))
-            ->paginated(false) // Tidak perlu paginasi untuk widget
+            ->paginated(true) // Tidak perlu paginasi untuk widget
             ->columns([
                 Tables\Columns\TextColumn::make('location.name')
                     ->label('Lokasi'),

@@ -60,11 +60,11 @@ class Dashboard extends BaseDashboard
     {
         return [
             LocationStatsWidget::class,
-            LocationRankingWidget::class,
             TopLocationsChartWidget::class,
             RankDistributionChart::class,
             // TopLocationWidget::class,
-            RecentAssignmentsWidget::class
+            RecentAssignmentsWidget::class,
+            LocationRankingWidget::class,
         ];
     }
 

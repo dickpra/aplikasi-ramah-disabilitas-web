@@ -16,7 +16,7 @@ class LocationRankingWidget extends BaseWidget
     {
         return $table
             // Query sekarang lebih sederhana, hanya filter yang skornya tidak null
-            ->query(Location::query()->whereNotNull('final_score'))
+            ->query(Location::query('final_score'))
             ->defaultSort('final_score', 'desc') // <-- SEKARANG BISA DI-SORTING!
             ->columns([
                 Tables\Columns\TextColumn::make('name')->searchable()->label('Nama Lokasi'),
@@ -26,7 +26,8 @@ class LocationRankingWidget extends BaseWidget
                 Tables\Columns\TextColumn::make('final_score')
                     ->label('Skor Akhir')
                     ->numeric(3)
-                    ->sortable(), // <-- Aktifkan sorting
+                    ->sortable() // <-- Aktifkan sorting
+                    ->placeholder('Belum Dinilai'),
 
                 Tables\Columns\TextColumn::make('rank')
                     ->label('Peringkat')
@@ -38,7 +39,8 @@ class LocationRankingWidget extends BaseWidget
                         'BRONZE' => 'gray',
                         default => 'danger',
                     })
-                    ->sortable(), // <-- Aktifkan sorting
+                    ->sortable() // <-- Aktifkan sorting
+                    ->placeholder('Belum Ada Peringkat')
             ]);
     }
 }

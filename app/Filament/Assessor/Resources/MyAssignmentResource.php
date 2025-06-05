@@ -136,53 +136,90 @@ class MyAssignmentResource extends Resource
                                         return new HtmlString($htmlOutput);
                                     }),
 
-                                Radio::make('score')
-                                    ->label('Skor Pilihan')
+                                    Radio::make('score')
+                                    ->label('Pilih Skor:')
                                     ->options(function (Get $get): array {
                                         $indicatorId = $get('indicator_id');
-                                        if (!$indicatorId) return ['0' => 'N/A'];
-                                        $indicator = Indicator::find($indicatorId);
-                                        if ($indicator && $indicator->scale_type) {
-                                            $scaleType = strtolower($indicator->scale_type);
-                                            if (str_starts_with($scaleType, 'skala ')) {
-                                                $parts = explode('-', str_replace('skala ', '', $scaleType));
-                                                if (count($parts) === 2 && is_numeric($parts[0]) && is_numeric($parts[1])) {
-                                                    $range = range((int)$parts[0], (int)$parts[1]);
-                                                    $options = [];
-                                                    foreach ($range as $value) {
-                                                        $options[(string)$value] = (string)$value; // Value dan Label adalah angka skor
-                                                    }
-                                                    return $options;
-                                                }
-                                            } elseif ($scaleType === 'ya/tidak') {
-                                                return ['1' => 'Ya', '0' => 'Tidak']; // Simpan sebagai 1 atau 0
-                                            } elseif ($scaleType === 'ada/tidak ada') {
-                                                return ['1' => 'Ada', '0' => 'Tidak Ada'];
-                                            }
-                                            // TODO: Tambahkan parsing untuk 'Kustom' jika scoring_criteria_text punya format baku dan bisa diparsing menjadi opsi
-                                            // Sementara, jika 'Kustom', asesor bisa input manual jika field diubah jadi TextInput, atau kita sediakan opsi umum.
+                                        if (!$indicatorId) {
+                                            return ['0' => 'N/A (Indikator tidak valid)']; // Fallback
                                         }
-                                        // Fallback jika tidak ada scale_type atau tidak dikenali
-                                        return ['1' => '1', '2' => '2', '3' => '3', '4' => '4', '5' => '5', '0' => 'N/A'];
-                                    })
-                                    // ->required() // Validasi kelengkapan akan dilakukan saat "Selesaikan Penilaian"
-                                    ->inline()->inlineLabel(false),
+                                        
+                                        $indicator = Indicator::find($indicatorId);
+                                        if (!$indicator) {
+                                            return ['0' => 'N/A (Indikator tidak ditemukan)']; // Fallback
+                                        }
 
+                                        $options = [];
+                                        $scaleType = strtolower($indicator->scale_type ?? '');
+                                        $criteriaText = $indicator->scoring_criteria_text ?? '';
+
+                                        // 1. Prioritaskan parsing dari scoring_criteria_text jika ada dan formatnya baku
+                                        // Asumsi format di scoring_criteria_text: "1. Deskripsi Level 1\n2. Deskripsi Level 2\n..."
+                                        if (!empty($criteriaText)) {
+                                            $criteriaLines = preg_split('/\r\n|\r|\n/', $criteriaText);
+                                            foreach ($criteriaLines as $line) {
+                                                // Mencocokkan format seperti "1. Teks Kriteria" atau "1 Teks Kriteria"
+                                                if (preg_match('/^(\d+)\s*[\.\)]?\s*(.*)/', trim($line), $matches)) {
+                                                    $scoreValue = trim($matches[1]);
+                                                    $scoreLabel = trim($matches[2]);
+                                                    // Gunakan skor sebagai value dan labelnya adalah skor + deskripsi kriteria
+                                                    $options[$scoreValue] = $scoreValue . '. ' . $scoreLabel;
+                                                }
+                                            }
+                                            // Jika berhasil parsing dari kriteria, gunakan itu
+                                            if (!empty($options)) {
+                                                return $options;
+                                            }
+                                        }
+
+                                        // 2. Jika scoring_criteria_text tidak ada atau tidak bisa diparsing, gunakan scale_type
+                                        if (str_starts_with($scaleType, 'skala ')) { // Contoh: "Skala 1-3", "Skala 1-5"
+                                            $parts = explode('-', str_replace('skala ', '', $scaleType));
+                                            if (count($parts) === 2 && is_numeric($parts[0]) && is_numeric($parts[1])) {
+                                                $start = (int)$parts[0];
+                                                $end = (int)$parts[1];
+                                                if ($start <= $end) { // Pastikan rentang valid
+                                                    $range = range($start, $end);
+                                                    // Label dan value sama (angka skor)
+                                                    return array_combine(array_map('strval', $range), array_map('strval', $range));
+                                                }
+                                            }
+                                        } elseif ($scaleType === 'ya/tidak') {
+                                            return ['1' => 'Ya (1)', '0' => 'Tidak (0)']; // Simpan sebagai 1 atau 0
+                                        } elseif ($scaleType === 'ada/tidak ada') {
+                                            return ['1' => 'Ada (1)', '0' => 'Tidak Ada (0)'];
+                                        }
+
+                                        // 3. Fallback jika tidak ada scale_type yang cocok atau tidak ada kriteria yang bisa diparsing
+                                        // Anda bisa set default yang paling umum atau error/pesan
+                                        return ['0' => 'N/A (Skala tidak terdefinisi)'];
+                                    })
+                                    ->inline()
+                                    ->inlineLabel(false)
+                                    // ->required() // Dihapus agar bisa simpan progres
+                                ,
                                 Textarea::make('assessor_notes')
                                     ->label('Catatan Asesor untuk Indikator Ini')
                                     ->rows(3)->columnSpanFull(),
 
                                 FileUpload::make('evidences_upload')
-                                    ->label('Unggah Bukti Baru')
+                                    ->label('Unggah atau Kelola Bukti Pendukung')
                                     ->multiple()
                                     ->directory(function (Get $get, Model $record) { // $record di sini adalah Assignment
                                         $assignmentId = $record?->id;
-                                        $assessmentScoreId = $get('assessment_score_id'); // ID AssessmentScore dari item repeater ini
+                                        $assessmentScoreId = $get('assessment_score_id'); // ID dari AssessmentScore terkait item repeater ini
                                         return ($assignmentId && $assessmentScoreId) ? "assessment-evidences/{$assignmentId}/{$assessmentScoreId}" : "assessment-evidences-temp/" . uniqid();
                                     })
+                                    ->disk('public') // Pastikan disknya diset
+                                    ->visibility('public') // Jika file perlu diakses via URL
                                     ->reorderable()
-                                    ->appendFiles() // Biarkan ini aktif agar bisa manage file lama dan baru
-                                    ->helperText('File yang sudah ada akan tetap tersimpan kecuali dihapus dari daftar ini. File baru akan ditambahkan.')
+                                    ->appendFiles()
+                                    ->openable()
+                                    ->downloadable()
+                                    ->previewable(true) // Aktifkan preview untuk gambar
+                                    ->maxSize(10240) // Contoh: batas ukuran 10MB
+                                    // ->acceptedFileTypes(['image/jpeg', 'image/png', 'application/pdf']) // Contoh tipe file
+                                    ->helperText('Unggah file baru atau hapus file yang sudah ada dari daftar di atas.')
                                     ->columnSpanFull(),
                                 
                                 // Placeholder untuk menampilkan bukti yang sudah ada dan opsi menghapusnya

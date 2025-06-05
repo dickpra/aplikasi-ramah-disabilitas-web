@@ -73,6 +73,8 @@ class EditMyAssignment extends EditRecord
                     'assessor_notes' => $score->assessor_notes,
                     'evidences_upload' => $score->evidences->pluck('file_path')->all(),
                 ];
+                $data['indicator_scores_repeater'] = $indicatorScoresData;
+
             }
         }
         
@@ -81,10 +83,10 @@ class EditMyAssignment extends EditRecord
 
         if ($assignment->status === 'assigned') {
             // Anda bisa uncomment ini jika ingin status otomatis berubah saat form dibuka pertama kali
-            // $assignment->status = 'in_progress';
-            // $assignment->saveQuietly();
-            // $this->refreshFormData(['status']); 
-            // $data['status'] = 'in_progress'; 
+            $assignment->status = 'in_progress';
+            $assignment->saveQuietly();
+            $this->refreshFormData(['status']); 
+            $data['status'] = 'in_progress'; 
         }
         $data['status'] = $assignment->status; // Untuk field status utama di form (jika ada)
 

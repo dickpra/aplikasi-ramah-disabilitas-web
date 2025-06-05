@@ -54,6 +54,7 @@ class LocationResource extends Resource
                     ->label('Provinsi')
                     ->createOptionForm(fn(Form $form) => \App\Filament\Resources\ProvinceResource::form($form)) // Menggunakan form dari ProvinceResource
                     ->createOptionModalHeading('Buat Provinsi Baru'),
+                    
 
                 // Tambahkan field opsional lain yang sudah ada di tabel locations jika ingin diinput dari sini
                 // Misalnya, jika Anda menambahkan 'address', 'latitude', 'longitude' ke tabel locations di masa depan.
@@ -75,6 +76,25 @@ class LocationResource extends Resource
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
+                // --- KOLOM BARU UNTUK SKOR AKHIR ---
+                Tables\Columns\TextColumn::make('final_assessment.final_score')
+                    ->label('Skor Akhir')
+                    ->numeric(3) // Tampilkan 3 angka di belakang koma
+                    ->sortable(false) // Sorting pada kolom kalkulasi perlu query custom, nonaktifkan dulu
+                    ->placeholder('Belum Dinilai'),
+
+                // --- KOLOM BARU UNTUK PERINGKAT ---
+                Tables\Columns\TextColumn::make('final_assessment.rank')
+                    ->label('Peringkat')
+                    ->badge()
+                    ->color(fn ($state): string => match (strtoupper($state ?? '')) {
+                        'DIAMOND' => 'info',
+                        'GOLD' => 'success',
+                        'SILVER' => 'warning',
+                        'BRONZE' => 'gray',
+                        default => 'danger',
+                    })
+                    ->placeholder('N/A'),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('province_id')

@@ -75,8 +75,8 @@ class IndicatorResource extends Resource
                                 'Skala 1-3' => 'Skala 1-3',
                                 'Skala 1-4' => 'Skala 1-4',
                                 'Skala 1-5' => 'Skala 1-5',
-                                'Ya/Tidak' => 'Ya/Tidak',
-                                'Ada/Tidak Ada' => 'Ada/Tidak Ada',
+                                // 'Ya/Tidak' => 'Ya/Tidak',
+                                // 'Ada/Tidak Ada' => 'Ada/Tidak Ada',
                                 'Kustom' => 'Kustom (Lihat Kriteria)',
                             ])
                             ->searchable()

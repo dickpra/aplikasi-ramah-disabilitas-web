@@ -5,6 +5,7 @@ namespace App\Filament\Resources\AssignmentResource\Pages;
 use App\Filament\Resources\AssignmentResource;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
+use Filament\Forms;
 
 class EditAssignment extends EditRecord
 {
@@ -16,4 +17,13 @@ class EditAssignment extends EditRecord
             Actions\DeleteAction::make(),
         ];
     }
+
+    // public function getFormActions(): array
+    // {
+    //     return [
+    //         Forms\Components\Select::make('assessor_ids')
+    //             ->label('Assessor')
+    //             ->disabled()
+    //     ];
+    // }
 }

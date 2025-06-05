@@ -26,6 +26,8 @@ use Illuminate\Support\HtmlString;
 use Illuminate\Support\Facades\Storage; // Untuk URL bukti
 use Illuminate\Validation\Rules\Unique;
 use Closure;
+use Livewire\Features\SupportFileUploads\TemporaryUploadedFile; // Penting untuk saveUploadedFileUsing
+use App\Filament\Assessor\Resources\MyAssignmentResource\Pages\EditMyAssignment; // Penting untuk type hint $livewire
 
 
 class MyAssignmentResource extends Resource
@@ -36,7 +38,7 @@ class MyAssignmentResource extends Resource
     protected static ?string $modelLabel = 'Tugas Penilaian Saya';
     protected static ?string $pluralModelLabel = 'Tugas Penilaian Saya';
 
-    public const ACTIVE_STATUSES = ['assigned', 'in_progress'];
+    public const ACTIVE_STATUSES = ['assigned', 'in_progress', 'revision_needed'];
 
     public static function getEloquentQuery(): Builder
     {
@@ -202,24 +204,40 @@ class MyAssignmentResource extends Resource
                                     ->label('Catatan Asesor untuk Indikator Ini')
                                     ->rows(3)->columnSpanFull(),
 
-                                FileUpload::make('evidences_upload')
+                                FileUpload::make('evidences_upload') // Nama field konsisten
                                     ->label('Unggah atau Kelola Bukti Pendukung')
-                                    ->multiple()
-                                    ->directory(function (Get $get, Model $record) { // $record di sini adalah Assignment
+                                    ->multiple()->disk('public')
+                                    ->visibility('public')
+                                    // ->maxSize(10000) // 1GB
+                                    ->directory(function (Get $get, Model $record /* Assignment */) {
                                         $assignmentId = $record?->id;
-                                        $assessmentScoreId = $get('assessment_score_id'); // ID dari AssessmentScore terkait item repeater ini
+                                        $assessmentScoreId = $get('assessment_score_id');
                                         return ($assignmentId && $assessmentScoreId) ? "assessment-evidences/{$assignmentId}/{$assessmentScoreId}" : "assessment-evidences-temp/" . uniqid();
                                     })
-                                    ->disk('public') // Pastikan disknya diset
-                                    ->visibility('public') // Jika file perlu diakses via URL
-                                    ->reorderable()
-                                    ->appendFiles()
-                                    ->openable()
-                                    ->downloadable()
-                                    ->previewable(true) // Aktifkan preview untuk gambar
-                                    ->maxSize(10240) // Contoh: batas ukuran 10MB
-                                    // ->acceptedFileTypes(['image/jpeg', 'image/png', 'application/pdf']) // Contoh tipe file
-                                    ->helperText('Unggah file baru atau hapus file yang sudah ada dari daftar di atas.')
+                                    ->reorderable()->appendFiles()->openable()->downloadable()->previewable(true)
+                                    ->saveUploadedFileUsing(static function (TemporaryUploadedFile $file, Get $get, Model $record /* Assignment */, EditMyAssignment $livewire /* Halaman EditMyAssignment */): string {
+                                        $assignmentId = $record?->id;
+                                        // $get('assessment_score_id') di sini mungkin tidak selalu reliable untuk path karena ini saat file diupload,
+                                        // assessment_score_id mungkin belum final jika item repeater baru.
+                                        // Lebih aman menggunakan path yang lebih umum di sini, atau path sementara,
+                                        // lalu di handleRecordUpdate kita pindahkan/rename jika perlu saat AssessmentScore ID sudah pasti.
+                                        // Untuk direktori, kita bisa buat berdasarkan assignmentId saja dulu.
+                                        $tempDirSuffix = $get('assessment_score_id') ?? $get('indicator_id') ?? 'temp';
+                                        $directory = "assessment-evidences/{$assignmentId}/{$tempDirSuffix}";
+                                        
+                                        $path = $file->store($directory, 'public');
+
+                                        if (property_exists($livewire, 'newlyUploadedFilesMetadata')) {
+                                            $livewire->newlyUploadedFilesMetadata[$path] = [
+                                                'original_file_name' => $file->getClientOriginalName(),
+                                                'file_mime_type' => $file->getMimeType(),
+                                                'file_size' => $file->getSize(),
+                                                'assessment_score_indicator_id' => $get('indicator_id'), // Simpan indicator_id untuk mencocokkan nanti
+                                            ];
+                                        }
+                                        return $path; 
+                                    })
+                                    ->helperText('File lama akan tampil. Unggah file baru atau hapus dari daftar.')
                                     ->columnSpanFull(),
                                 
                                 // Placeholder untuk menampilkan bukti yang sudah ada dan opsi menghapusnya
@@ -243,9 +261,16 @@ class MyAssignmentResource extends Resource
                 Tables\Columns\TextColumn::make('due_date')->label('Batas Waktu')->date('d M Y')->sortable(),
                 Tables\Columns\TextColumn::make('status')->label('Status')->badge()
                     ->color(fn (string $state): string => match ($state) {
+                        // 'assigned' => 'primary',
+                        // 'in_progress' => 'warning',
+                        // 'completed' => 'success',
+                        // 'cancelled' => 'danger',
                         'assigned' => 'primary',
                         'in_progress' => 'warning',
-                        'completed' => 'success',
+                        'completed' => 'info',
+                        'pending_review_admin' => 'warning',
+                        'approved' => 'success',
+                        'revision_needed' => 'danger',
                         'cancelled' => 'danger',
                         default => 'gray',
                     })->searchable()->sortable(),

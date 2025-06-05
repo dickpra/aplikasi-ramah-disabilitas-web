@@ -128,8 +128,8 @@ class LocationResource extends Resource
         return [
             'index' => Pages\ListLocations::route('/'),
             'create' => Pages\CreateLocation::route('/create'),
-            'edit' => Pages\EditLocation::route('/{record}/edit'),
             // 'view' => Pages\ViewLocation::route('/{record}'),
+            'edit' => Pages\EditLocation::route('/{record}/edit'),
         ];
     }
 }

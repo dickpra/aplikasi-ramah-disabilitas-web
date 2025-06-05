@@ -13,10 +13,13 @@ use Illuminate\Database\Eloquent\Casts\Attribute; // Penting untuk accessor
 class Location extends Model
 {
     use HasFactory;
+    // app/Models/Location.php
     protected $fillable = [
-        'province_id',
-        'name',          // Nama lokasi
-        'location_type', // Jenis lokasi
+        'province_id', 
+        'name', 
+        'location_type',
+        'final_score', // <-- Tambahkan
+        'rank',        // <-- Tambahkan
     ];
 
     public function province(): BelongsTo

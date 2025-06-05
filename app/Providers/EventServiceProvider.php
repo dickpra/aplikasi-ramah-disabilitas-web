@@ -6,6 +6,8 @@ use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Event;
+use App\Models\Assignment; // <-- Import model
+use App\Observers\AssignmentObserver; // <-- Import observer
 
 class EventServiceProvider extends ServiceProvider
 {
@@ -18,6 +20,10 @@ class EventServiceProvider extends ServiceProvider
         Registered::class => [
             SendEmailVerificationNotification::class,
         ],
+    ];
+
+    protected $observers = [
+        Assignment::class => [AssignmentObserver::class], // <--- TAMBAHKAN BARIS INI
     ];
 
     /**

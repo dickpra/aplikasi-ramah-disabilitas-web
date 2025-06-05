@@ -16,6 +16,8 @@ return new class extends Migration
             $table->foreignId('province_id')->constrained('provinces')->onDelete('cascade');
             $table->string('name'); // Ini adalah nama lokasi
             $table->string('location_type')->nullable()->comment('Tipe lokasi, cth: city, university, regency'); // Kolom baru untuk jenis lokasi
+            $table->decimal('final_score', 8, 3)->nullable()->comment('Skor akhir hasil kalkulasi');
+            $table->string('rank')->nullable()->comment('Peringkat hasil kalkulasi (DIAMOND, GOLD, dll.)');
             $table->timestamps();
         });
     }

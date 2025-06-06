@@ -18,12 +18,4 @@ class EditAssignment extends EditRecord
         ];
     }
 
-    // public function getFormActions(): array
-    // {
-    //     return [
-    //         Forms\Components\Select::make('assessor_ids')
-    //             ->label('Assessor')
-    //             ->disabled()
-    //     ];
-    // }
 }

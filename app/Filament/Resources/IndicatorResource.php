@@ -141,15 +141,24 @@ class IndicatorResource extends Resource
                     ->options(fn () => Indicator::query()->select('category')->distinct()->whereNotNull('category')->pluck('category', 'category')->all())
                     ->label('Filter Kategori'),
                 Tables\Filters\SelectFilter::make('target_location_type')
-                     ->options([
-                        'city' => 'Kota (City)',
-                        'regency' => 'Kabupaten (Regency)',
-                        'university' => 'Perguruan Tinggi',
-                        'school' => 'Sekolah',
-                        'company' => 'Perusahaan',
-                        'public_facility' => 'Fasilitas Publik',
-                        'all' => 'Semua Jenis Lokasi',
-                    ])
+                    //  ->options([
+                    //     'city' => 'Kota (City)',
+                    //     'regency' => 'Kabupaten (Regency)',
+                    //     'university' => 'Perguruan Tinggi',
+                    //     'school' => 'Sekolah',
+                    //     'company' => 'Perusahaan',
+                    //     'public_facility' => 'Fasilitas Publik',
+                    //     'all' => 'Semua Jenis Lokasi',
+                    // ])
+                    ->options([
+                            'Kota' => 'Kota',
+                            'Kabupaten' => 'Kabupaten',
+                            'Perguruan Tinggi' => 'Perguruan Tinggi',
+                            'Sekolah' => 'Sekolah',
+                            'Ruang Publik' => 'Ruang Publik',
+                            'all' => 'Semua Jenis Lokasi',
+                        ])
+                    
                     ->label('Filter Target Lokasi'),
                 Tables\Filters\TernaryFilter::make('is_active')
                     ->label('Status Aktif'),

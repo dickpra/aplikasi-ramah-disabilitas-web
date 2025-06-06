@@ -17,6 +17,8 @@ class LocationStatsWidget extends BaseWidget
             $query->where('status', 'approved');
         })->get();
 
+        $semualokasi = Location::count(); // Total lokasi yang ada
+
         $totalAssessed = $assessedLocations->count();
 
         $averageScore = 0;
@@ -31,6 +33,10 @@ class LocationStatsWidget extends BaseWidget
         $assessorsCount = Assessor::count();
 
         return [
+            // Stat::make('Total Semua Lokasi', $semualokasi)
+            //     ->description('Jumlah total lokasi yang terdaftar')
+            //     ->descriptionIcon('heroicon-m-map-pin')
+            //     ->color('primary'),
             Stat::make('Total Lokasi Dinilai', $totalAssessed)
                 ->description('Jumlah lokasi dengan penilaian yang sudah disetujui')
                 ->descriptionIcon('heroicon-m-building-office-2')

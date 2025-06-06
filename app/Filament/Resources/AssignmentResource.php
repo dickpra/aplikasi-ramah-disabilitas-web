@@ -349,12 +349,12 @@ class AssignmentResource extends Resource
                         'cancelled' => 'Dibatalkan',
                     ])->label('Filter Status'),
             ])
-            ->actions([
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\ViewAction::make(),
-                Tables\Actions\DeleteAction::make(),
+            // ->actions([
+            //     Tables\Actions\EditAction::make(),
+            //     Tables\Actions\ViewAction::make(),
+            //     Tables\Actions\DeleteAction::make(),
                 
-            ])
+            // ])
             // ->actions([
             //     Action::make('review')
             //         ->label('Review & Aksi')
@@ -390,9 +390,17 @@ class AssignmentResource extends Resource
     
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                    // Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ]);
+    }
+    public static function canEdit(Model $record): bool
+    {
+        // Admin hanya bisa mengedit jika statusnya masih dalam alur kerja aktif.
+        // Status final seperti 'completed', 'approved', atau 'cancelled' tidak bisa diedit lagi.
+        $editableStatuses = ['assigned', 'in_progress', 'revision_needed'];
+
+        return in_array($record->status, $editableStatuses);
     }
 
     // public static function infolist(Infolist $infolist): Infolist

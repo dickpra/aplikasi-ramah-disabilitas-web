@@ -6,33 +6,51 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget as BaseWidget;
 use App\Models\Location;
+use pxlrbt\FilamentExcel\Actions\Tables\ExportAction;
+use pxlrbt\FilamentExcel\Exports\ExcelExport;
 
 class LocationRankingWidget extends BaseWidget
 {
-    protected static ?int $sort = 2; // Urutan widget di dashboard
-    protected int | string | array $columnSpan = 'full'; // Agar widget ini memakai lebar penuh
+    protected static ?int $sort = 2;
+    protected int | string | array $columnSpan = 'full';
+    protected static ?string $heading = 'Peringkat Lokasi';
+
+    // Metode getHeaderActions() bisa kita hapus karena logikanya dipindah ke dalam table()
+    // protected function getHeaderActions(): array { ... }
 
     public function table(Table $table): Table
     {
         return $table
-            // Query sekarang lebih sederhana, hanya filter yang skornya tidak null
-            ->query(Location::query('final_score'))
-            ->defaultSort('final_score', 'desc') // <-- SEKARANG BISA DI-SORTING!
-            ->columns([
-                Tables\Columns\TextColumn::make('name')->searchable()->label('Nama Lokasi'),
-                Tables\Columns\TextColumn::make('province.country.name')
-                    ->searchable()
-                    ->sortable()
-                    ->label('Negara'),
-                Tables\Columns\TextColumn::make('province.name')->searchable()->label('Provinsi'),
-                // Tables\Columns\TextColumn::make('country.name')->searchable()->label('Negara'),
+            // --- 1. UBAH QUERY UNTUK MENGAMBIL SEMUA LOKASI ---
+            ->query(
+                Location::query()
+                    // Tidak ada lagi whereNotNull, jadi semua lokasi akan tampil
+                    ->with('province.country') // Tetap gunakan eager loading untuk performa
+            )
+            ->defaultSort('final_score', 'desc') // Urutkan berdasarkan skor tertinggi (yang null akan di bawah)
 
-                // Gunakan kolom fisik, bukan accessor lagi
+            // --- 2. PINDAHKAN AKSI EKSPOR KE SINI ---
+            ->headerActions([
+                ExportAction::make()
+                    ->label('Ekspor ke Excel')
+                    ->exports([
+                        ExcelExport::make()
+                            ->fromTable()
+                            ->withFilename('Peringkat Lokasi - ' . date('Y-m-d'))
+                            ->withWriterType(\Maatwebsite\Excel\Excel::XLSX)
+                    ]),
+            ])
+
+            ->columns([
+                Tables\Columns\TextColumn::make('name')->searchable()->sortable()->label('Nama Lokasi'),
+                Tables\Columns\TextColumn::make('province.country.name')->searchable()->sortable()->label('Negara'),
+                Tables\Columns\TextColumn::make('province.name')->searchable()->sortable()->label('Provinsi'),
+                
                 Tables\Columns\TextColumn::make('final_score')
                     ->label('Skor Akhir')
                     ->numeric(3)
-                    ->sortable() // <-- Aktifkan sorting
-                    ->placeholder('Belum Dinilai'),
+                    ->sortable()
+                    ->placeholder('Belum Dinilai'), // Akan tampil untuk lokasi yang skornya null
 
                 Tables\Columns\TextColumn::make('rank')
                     ->label('Peringkat')
@@ -44,8 +62,8 @@ class LocationRankingWidget extends BaseWidget
                         'BRONZE' => 'gray',
                         default => 'danger',
                     })
-                    ->sortable() // <-- Aktifkan sorting
-                    ->placeholder('Belum Ada Peringkat')
+                    ->sortable()
+                    ->placeholder('Belum Ada Peringkat'), // Akan tampil untuk lokasi yang peringkatnya null
             ]);
     }
 }

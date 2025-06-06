@@ -292,7 +292,9 @@ class MyAssignmentResource extends Resource
                 Tables\Actions\ViewAction::make()->label('Lihat Detail Tugas'),
             ])
             ->bulkActions([])
-            ->defaultSort('due_date', 'asc');
+            ->defaultSort('created_at', 'desc')
+            // ->defaultSort('due_date', 'asc')
+            ;
     }
 
     public static function getRelations(): array

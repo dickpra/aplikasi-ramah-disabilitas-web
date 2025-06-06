@@ -29,22 +29,29 @@ class LocationResource extends Resource
                     ->required()
                     ->maxLength(255)
                     ->label('Nama Lokasi'),
-                Forms\Components\TextInput::make('location_type')
-                    ->required() // Jadikan required jika tipe selalu ada
-                    ->maxLength(255)
-                    ->label('Jenis Lokasi')
-                    ->helperText('Contoh: Kota, Kabupaten, Perguruan Tinggi, Sekolah, Taman, dll.'),
+                // Forms\Components\TextInput::make('location_type')
+                //     ->required() // Jadikan required jika tipe selalu ada
+                //     ->maxLength(255)
+                //     ->label('Jenis Lokasi')
+                //     ->helperText('Contoh: Kota, Kabupaten, Perguruan Tinggi, Sekolah, Taman, dll.'),
                     // Anda bisa ganti dengan Select jika jenisnya baku:
-                    // Forms\Components\Select::make('location_type')
-                    //     ->options([
-                    //         'city' => 'Kota',
-                    //         'regency' => 'Kabupaten',
-                    //         'university' => 'Perguruan Tinggi',
-                    //         'school' => 'Sekolah',
-                    //         'public_space' => 'Ruang Publik',
-                    //     ])
-                    //     ->required()
-                    //     ->label('Jenis Lokasi'),
+                    Forms\Components\Select::make('location_type')
+                        // ->options([
+                        //     'city' => 'Kota',
+                        //     'regency' => 'Kabupaten',
+                        //     'university' => 'Perguruan Tinggi',
+                        //     'school' => 'Sekolah',
+                        //     'public_space' => 'Ruang Publik',
+                        // ])
+                    ->options([
+                            'Kota' => 'Kota',
+                            'Kabupaten' => 'Kabupaten',
+                            'Perguruan Tinggi' => 'Perguruan Tinggi',
+                            'Sekolah' => 'Sekolah',
+                            'Ruang Publik' => 'Ruang Publik',
+                        ])
+                        ->required()
+                        ->label('Jenis Lokasi'),
 
                 Forms\Components\Select::make('province_id')
                     ->relationship('province', 'name')
@@ -67,6 +74,7 @@ class LocationResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+        
             ->columns([
                 Tables\Columns\TextColumn::make('name')->searchable()->sortable()->label('Nama Lokasi'),
                 Tables\Columns\TextColumn::make('location_type')->searchable()->sortable()->label('Jenis Lokasi'),
@@ -107,7 +115,7 @@ class LocationResource extends Resource
             ->actions([
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\ViewAction::make(),
-                Tables\Actions\DeleteAction::make(),
+                // Tables\Actions\DeleteAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

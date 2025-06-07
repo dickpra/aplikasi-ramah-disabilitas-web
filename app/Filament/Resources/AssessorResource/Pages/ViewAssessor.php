@@ -1,21 +1,15 @@
 <?php
-
 namespace App\Filament\Resources\AssessorResource\Pages;
 
 use App\Filament\Resources\AssessorResource;
 use Filament\Actions;
-use Filament\Resources\Pages\EditRecord;
+use Filament\Resources\Pages\ViewRecord;
 
-class EditAssessor extends EditRecord
+class ViewAssessor extends ViewRecord
 {
     protected static string $resource = AssessorResource::class;
 
-    protected function getHeaderActions(): array
-    {
-        return [
-            Actions\DeleteAction::make(),
-        ];
-    }
+    // --- TAMBAHKAN METODE INI ---
     protected function getHeaderWidgets(): array
     {
         return [

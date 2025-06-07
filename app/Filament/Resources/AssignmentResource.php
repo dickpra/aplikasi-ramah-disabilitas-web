@@ -319,7 +319,7 @@ class AssignmentResource extends Resource
                 Tables\Columns\TextColumn::make('location.name')->searchable()->sortable()->label('Lokasi'),
                 Tables\Columns\TextColumn::make('assessor.name')->searchable()->sortable()->label('Asesor'), // Diubah dari user.name
                 Tables\Columns\TextColumn::make('assignment_date')->date()->sortable()->label('Tgl Penugasan'),
-                Tables\Columns\TextColumn::make('due_date')->date()->sortable()->label('Batas Waktu'),
+                Tables\Columns\TextColumn::make('due_date')->date()->sortable()->label('Batas Waktu')->placeholder('Tidak Ada Batasan'),
                 Tables\Columns\TextColumn::make('status')->badge()->searchable()->sortable()
                     ->color(fn (string $state): string => match ($state) {
                         'assigned' => 'primary',
@@ -331,6 +331,12 @@ class AssignmentResource extends Resource
                         'cancelled' => 'gray',
                         default => 'gray',
                     })->label('Status'),
+                    Tables\Columns\TextColumn::make('final_score')
+                ->label('Hasil Skor')
+                ->numeric(3)
+                ->placeholder('Belum ada skor')
+                ->sortable(false), // Sorting pada accessor perlu query custom, nonaktifkan dulu
+
                 Tables\Columns\TextColumn::make('created_at') // Kolom untuk sorting
                     ->dateTime()
                     ->sortable()

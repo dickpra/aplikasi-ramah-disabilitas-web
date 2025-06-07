@@ -21,8 +21,9 @@ class Assessor extends Authenticatable implements FilamentUser // Implementasi F
     protected $fillable = [
         'name',
         'email',
+        'phone_number', // <-- Tambahkan
+        'country',      // <-- Tambahkan
         'password',
-        // 'specialization', // Jika Anda menambahkan kolom lain
     ];
 
     protected $hidden = [
@@ -34,13 +35,6 @@ class Assessor extends Authenticatable implements FilamentUser // Implementasi F
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
     ];
-
-    public function cities(): BelongsToMany
-    {
-        return $this->belongsToMany(City::class, 'city_assessor')
-                    ->withPivot('assignment_date', 'description', 'id')
-                    ->withTimestamps();
-    }
 
     public function assignments(): HasMany
     {

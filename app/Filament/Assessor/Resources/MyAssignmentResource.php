@@ -82,9 +82,39 @@ class MyAssignmentResource extends Resource
                             ->options(['in_progress' => 'Sedang Dikerjakan'])
                             ->visible(fn (string $operation, ?Assignment $record): bool => $operation === 'edit' && $record?->status === 'assigned')
                             ->helperText('Pilih "Sedang Dikerjakan" jika Anda memulai penilaian ini.'),
-                        Placeholder::make('current_status_display')
+                        // Placeholder::make('current_status_display')
+                        //     ->label('Status Tugas Saat Ini')
+                        //     ->content(fn (?Assignment $record): string => ucfirst(str_replace('_', ' ', $record?->status ?? 'assigned')))
+                        //     ->visible(fn (string $operation, ?Assignment $record): bool => $operation === 'edit' && $record?->status !== 'assigned'),
+                        Forms\Components\Placeholder::make('current_status_display')
                             ->label('Status Tugas Saat Ini')
-                            ->content(fn (?Assignment $record): string => ucfirst(str_replace('_', ' ', $record?->status ?? 'assigned')))
+                            ->content(function (?Assignment $record): ?HtmlString {
+                                if (!$record || !$record->status) {
+                                    return null;
+                                }
+                                $status = $record->status;
+                                $statusText = ucfirst(str_replace('_', ' ', $status));
+
+                                // Tentukan nama warna Filament berdasarkan status
+                                $colorName = match ($status) {
+                                    'assigned' => 'primary',
+                                    'in_progress' => 'warning',
+                                    'completed' => 'info',
+                                    'pending_review_admin' => 'warning',
+                                    'approved' => 'success',
+                                    'revision_needed' => 'danger',
+                                    'cancelled' => 'gray',
+                                    default => 'gray',
+                                };
+
+                                // Bangun kelas CSS untuk warna teks
+                                $colorClasses = "text-{$colorName}-600 dark:text-{$colorName}-400";
+                                
+                                // Buat elemen HTML span dengan kelas warna
+                                $html = "<span class='font-semibold {$colorClasses}'>" . e($statusText) . "</span>";
+                                
+                                return new HtmlString($html);
+                            })
                             ->visible(fn (string $operation, ?Assignment $record): bool => $operation === 'edit' && $record?->status !== 'assigned'),
                         Textarea::make('notes')
                             ->label('Catatan Umum Penugasan (dari Admin)')

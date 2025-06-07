@@ -1,0 +1,7 @@
+:root.dark {
+    --filament-bg: theme('colors.zinc.900');
+    --filament-card-bg: theme('colors.zinc.800');
+    --filament-sidebar-bg: theme('colors.zinc.900');
+    --filament-text: theme('colors.zinc.100');
+    --filament-primary: theme('colors.blue.500'); /* warna aksen tetap */
+}

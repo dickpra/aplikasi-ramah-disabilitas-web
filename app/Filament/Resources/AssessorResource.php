@@ -68,6 +68,16 @@ class AssessorResource extends Resource
                     ->label('Alamat Email')
                     ->searchable()
                     ->sortable(),
+                Tables\Columns\TextColumn::make('assignments_count')
+                    ->counts('assignments') // Menghitung jumlah relasi 'assignments'
+                    ->label('Total Tugas')
+                    ->sortable(),
+
+                Tables\Columns\TextColumn::make('assignments_max_updated_at')
+                    ->max('assignments', 'updated_at') // Mengambil tanggal update terakhir dari relasi
+                    ->label('Aktivitas Terakhir')
+                    ->since() // Tampilkan dalam format "x hari yang lalu"
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('Tanggal Terdaftar')
                     ->dateTime()
@@ -106,6 +116,8 @@ class AssessorResource extends Resource
             'index' => Pages\ListAssessors::route('/'),
             'create' => Pages\CreateAssessor::route('/create'),
             'edit' => Pages\EditAssessor::route('/{record}/edit'),
+            'view' => Pages\ViewAssessor::route('/{record}'), // <-- Halaman View akan menampilkan widget
+
         ];
     }
 }

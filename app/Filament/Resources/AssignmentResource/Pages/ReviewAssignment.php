@@ -50,8 +50,15 @@ class ReviewAssignment extends Page
                                 'cancelled' => 'gray', default => 'secondary',
                             }),
                         InfolistComponents\TextEntry::make('assignment_date')->date('d M Y')->label('Tgl Penugasan'),
-                        InfolistComponents\TextEntry::make('due_date')->date('d M Y')->label('Batas Waktu'),
+                        InfolistComponents\TextEntry::make('due_date')->date('d M Y')->label('Batas Waktu')->placeholder('Tidak Ada Batasan'),
                         InfolistComponents\TextEntry::make('updated_at')->dateTime('d M Y H:i')->label('Terakhir Disubmit'),
+                        InfolistComponents\TextEntry::make('final_score')
+                        ->label('Skor Akhir Penilaian')
+                        ->weight('bold') // Buat tebal agar menonjol
+                        ->size('lg')     // Buat ukuran font lebih besar
+                        ->badge()
+                        ->color('primary')
+                        ->placeholder('Belum Dihitung'),
                     ]),
 
                 InfolistComponents\Section::make('Hasil Penilaian Indikator oleh Asesor')

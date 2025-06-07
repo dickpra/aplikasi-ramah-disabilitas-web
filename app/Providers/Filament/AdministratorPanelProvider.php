@@ -46,6 +46,8 @@ class AdministratorPanelProvider extends PanelProvider
                 // Widgets\FilamentInfoWidget::class,
             ])
             ->middleware([
+                
+                \Illuminate\Session\Middleware\StartSession::class . ':admin_session', // Nama cookie kustom
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,
                 StartSession::class,
@@ -76,7 +78,8 @@ class AdministratorPanelProvider extends PanelProvider
             ])
             ->authGuard('admin')
             ->authMiddleware([
-                Authenticate::class,
+                Authenticate::class . ':admin',
+                // Authenticate::class,
             ]);
             
     }

@@ -74,7 +74,8 @@ class LocationResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
-        
+            ->defaultSort('final_score', 'desc')
+            // ->defaultSort('final_assessment.final_score') // Urutkan berdasarkan tanggal dibuat
             ->columns([
                 Tables\Columns\TextColumn::make('name')->searchable()->sortable()->label('Nama Lokasi'),
                 Tables\Columns\TextColumn::make('location_type')->searchable()->sortable()->label('Jenis Lokasi'),

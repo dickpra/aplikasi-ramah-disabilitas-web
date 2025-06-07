@@ -23,7 +23,7 @@ class EventServiceProvider extends ServiceProvider
     ];
 
     protected $observers = [
-        Assignment::class => [AssignmentObserver::class], // <--- TAMBAHKAN BARIS INI
+        \App\Models\Assignment::class => [\App\Observers\AssignmentObserver::class],
     ];
 
     /**

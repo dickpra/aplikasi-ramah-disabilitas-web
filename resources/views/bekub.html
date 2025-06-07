@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | Aplikasi Penilaian Ramah Disabilitas</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            200: '#bae6fd',
+                            300: '#7dd3fc',
+                            400: '#38bdf8',
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                            700: '#0369a1',
+                            800: '#075985',
+                            900: '#0c4a6e',
+                        },
+                        secondary: {
+                            50: '#f5f3ff',
+                            100: '#ede9fe',
+                            200: '#ddd6fe',
+                            300: '#c4b5fd',
+                            400: '#a78bfa',
+                            500: '#8b5cf6',
+                            600: '#7c3aed',
+                            700: '#6d28d9',
+                            800: '#5b21b6',
+                            900: '#4c1d95',
+                        },
+                        accent: {
+                            50: '#ecfdf5',
+                            100: '#d1fae5',
+                            200: '#a7f3d0',
+                            300: '#6ee7b7',
+                            400: '#34d399',
+                            500: '#10b981',
+                            600: '#059669',
+                            700: '#047857',
+                            800: '#065f46',
+                            900: '#064e3b',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Custom styles */
+        .accessibility-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 50;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        
+        .sidebar-minimized {
+            width: 80px;
+        }
+        
+        .sidebar-minimized .nav-text {
+            display: none;
+        }
+        
+        .main-content-expanded {
+            margin-left: 80px;
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        
+        /* High contrast mode */
+        .high-contrast {
+            background-color: black !important;
+            color: white !important;
+        }
+        
+        .high-contrast .bg-white {
+            background-color: black !important;
+            color: yellow !important;
+            border-color: yellow !important;
+        }
+        
+        .high-contrast .text-gray-600 {
+            color: white !important;
+        }
+        
+        .grayscale {
+            filter: grayscale(100%);
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-900 font-sans transition-colors duration-300">
+    <div class="flex h-screen overflow-hidden">
+        <!-- Sidebar -->
+        
+        
+        <!-- Main Content -->
+        <div class="flex-1 overflow-auto main-content-expanded transition-all duration-300">
+            <!-- Top Navigation -->
+            <header class="bg-white shadow-sm">
+                <div class="flex items-center justify-between px-6 py-4">
+                    <div class="flex items-center">
+                        <button id="toggleSidebar" class="mr-4 text-gray-600 hover:text-primary-600">
+                            <i class="fas fa-bars text-xl"></i>
+                        </button>
+                        <h1 class="text-2xl font-bold text-gray-800">Dashboard Penilaian Ramah Disabilitas</h1>
+                    </div>
+                    
+                    <div class="flex items-center space-x-4">
+                        <button class="text-gray-600 hover:text-primary-600 relative">
+                            <i class="fas fa-bell text-xl"></i>
+                            <span class="absolute top-0 right-0 h-2 w-2 rounded-full bg-red-500"></span>
+                        </button>
+                        <div class="border-l border-gray-200 h-8"></div>
+                        <button class="text-gray-600 hover:text-primary-600">
+                            <i class="fas fa-question-circle text-xl"></i>
+                        </button>
+                        <div class="border-l border-gray-200 h-8"></div>
+                        <div class="relative">
+                            <button class="flex items-center text-gray-600 hover:text-primary-600">
+                                <span class="mr-2 hidden md:inline">Bahasa</span>
+                                <i class="fas fa-globe text-xl"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </header>
+            
+            <!-- Dashboard Content -->
+            <main class="p-6">
+                <!-- Welcome Banner -->
+                <div class="bg-gradient-to-r from-primary-600 to-secondary-600 rounded-xl shadow-md p-6 text-white mb-8">
+                    <div class="flex flex-col md:flex-row justify-between items-center">
+                        <div>
+                            <h2 class="text-2xl font-bold mb-2">Selamat Datang di RADIS</h2>
+                            <p class="max-w-2xl">RADIS (Ramah Disabilitas) adalah sistem penilaian untuk mengukur tingkat kesesuaian fasilitas publik bagi penyandang disabilitas. Mari bersama-sama menciptakan lingkungan yang inklusif!</p>
+                        </div>
+                        <div class="mt-4 md:mt-0">
+                            <button class="bg-white text-primary-700 hover:bg-gray-100 px-6 py-2 rounded-lg font-medium transition-colors">
+                                Mulai Penilaian <i class="fas fa-arrow-right ml-2"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Stats Overview -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <div class="bg-white rounded-xl shadow-md p-6 card-hover transition-all duration-300">
+                        <div class="flex items-center">
+                            <div class="p-3 rounded-full bg-primary-100 text-primary-600 mr-4">
+                                <i class="fas fa-building text-xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-gray-500 text-sm font-medium">Total Fasilitas</h3>
+                                <p class="text-2xl font-bold">248</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-md p-6 card-hover transition-all duration-300">
+                        <div class="flex items-center">
+                            <div class="p-3 rounded-full bg-accent-100 text-accent-600 mr-4">
+                                <i class="fas fa-check-circle text-xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-gray-500 text-sm font-medium">Telah Dinilai</h3>
+                                <p class="text-2xl font-bold">189</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-md p-6 card-hover transition-all duration-300">
+                        <div class="flex items-center">
+                            <div class="p-3 rounded-full bg-yellow-100 text-yellow-600 mr-4">
+                                <i class="fas fa-star text-xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-gray-500 text-sm font-medium">Rata-rata Penilaian</h3>
+                                <p class="text-2xl font-bold">4.2 <span class="text-sm">/ 5.0</span></p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-md p-6 card-hover transition-all duration-300">
+                        <div class="flex items-center">
+                            <div class="p-3 rounded-full bg-purple-100 text-purple-600 mr-4">
+                                <i class="fas fa-users text-xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-gray-500 text-sm font-medium">Pengguna Aktif</h3>
+                                <p class="text-2xl font-bold">47</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Recent Assessments Chart -->
+                <div class="bg-white rounded-xl shadow-md p-6 mb-8">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-xl font-bold text-gray-800">Penilaian Terbaru</h2>
+                        <select class="border border-gray-300 rounded-lg px-3 py-2 bg-white text-gray-700">
+                            <option>30 Hari Terakhir</option>
+                            <option>7 Hari Terakhir</option>
+                            <option>Hari Ini</option>
+                        </select>
+                    </div>
+                    <div class="h-80">
+                        <div class="h-full flex items-center justify-center bg-gray-50 rounded-lg">
+                            <p class="text-gray-500">Grafik data penilaian akan ditampilkan di sini</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Recent Activities & Top Facilities -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                    <!-- Recent Activities -->
+                    <div class="bg-white rounded-xl shadow-md p-6">
+                        <h2 class="text-xl font-bold text-gray-800 mb-4">Aktivitas Terkini</h2>
+                        <div class="space-y-4">
+                            <div class="flex items-start border-b border-gray-100 pb-4">
+                                <div class="p-2 rounded-full bg-primary-100 text-primary-600 mr-4">
+                                    <i class="fas fa-user-edit"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-medium">Admin menambahkan fasilitas baru</h4>
+                                    <p class="text-sm text-gray-500">Pusat Perbelanjaan Grand Indonesia</p>
+                                    <p class="text-xs text-gray-400">2 jam yang lalu</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start border-b border-gray-100 pb-4">
+                                <div class="p-2 rounded-full bg-accent-100 text-accent-600 mr-4">
+                                    <i class="fas fa-check-circle"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-medium">Penilaian selesai</h4>
+                                    <p class="text-sm text-gray-500">Stasiun Gambir oleh Budi Santoso</p>
+                                    <p class="text-xs text-gray-400">5 jam yang lalu</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start border-b border-gray-100 pb-4">
+                                <div class="p-2 rounded-full bg-yellow-100 text-yellow-600 mr-4">
+                                    <i class="fas fa-star"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-medium">Fasilitas mendapat rating tinggi</h4>
+                                    <p class="text-sm text-gray-500">Bandara Soekarno-Hatta (4.8/5.0)</p>
+                                    <p class="text-xs text-gray-400">Kemarin, 14:32</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start pb-2">
+                                <div class="p-2 rounded-full bg-blue-100 text-blue-600 mr-4">
+                                    <i class="fas fa-file-alt"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-medium">Laporan bulanan dihasilkan</h4>
+                                    <p class="text-sm text-gray-500">Laporan Agustus 2023 siap diunduh</p>
+                                    <p class="text-xs text-gray-400">Kemarin, 09:45</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Top Facilities -->
+                    <div class="bg-white rounded-xl shadow-md p-6">
+                        <h2 class="text-xl font-bold text-gray-800 mb-4">Fasilitas Terbaik</h2>
+                        <div class="space-y-4">
+                            <div class="flex items-center p-3 rounded-lg bg-gray-50 hover:bg-primary-50 transition-colors">
+                                <div class="flex-shrink-0 h-12 w-12 bg-primary-100 rounded-lg flex items-center justify-center text-primary-600 mr-4">
+                                    <i class="fas fa-hospital-alt"></i>
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <h4 class="font-medium truncate">Rumah Sakit Premier</h4>
+                                    <p class="text-sm text-gray-500 truncate">Jakarta Selatan</p>
+                                </div>
+                                <div class="ml-4 flex items-center">
+                                    <span class="text-yellow-500 mr-1"><i class="fas fa-star"></i></span>
+                                    <span class="font-medium">4.9</span>
+                                </div>
+                            </div>
+                            <div class="flex items-center p-3 rounded-lg bg-gray-50 hover:bg-primary-50 transition-colors">
+                                <div class="flex-shrink-0 h-12 w-12 bg-blue-100 rounded-lg flex items-center justify-center text-blue-600 mr-4">
+                                    <i class="fas fa-plane-departure"></i>
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <h4 class="font-medium truncate">Bandara Soekarno-Hatta</h4>
+                                    <p class="text-sm text-gray-500 truncate">Tangerang</p>
+                                </div>
+                                <div class="ml-4 flex items-center">
+                                    <span class="text-yellow-500 mr-1"><i class="fas fa-star"></i></span>
+                                    <span class="font-medium">4.8</span>
+                                </div>
+                            </div>
+                            <div class="flex items-center p-3 rounded-lg bg-gray-50 hover:bg-primary-50 transition-colors">
+                                <div class="flex-shrink-0 h-12 w-12 bg-green-100 rounded-lg flex items-center justify-center text-green-600 mr-4">
+                                    <i class="fas fa-university"></i>
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <h4 class="font-medium truncate">Universitas Indonesia</h4>
+                                    <p class="text-sm text-gray-500 truncate">Depok</p>
+                                </div>
+                                <div class="ml-4 flex items-center">
+                                    <span class="text-yellow-500 mr-1"><i class="fas fa-star"></i></span>
+                                    <span class="font-medium">4.7</span>
+                                </div>
+                            </div>
+                            <div class="flex items-center p-3 rounded-lg bg-gray-50 hover:bg-primary-50 transition-colors">
+                                <div class="flex-shrink-0 h-12 w-12 bg-purple-100 rounded-lg flex items-center justify-center text-purple-600 mr-4">
+                                    <i class="fas fa-shopping-bag"></i>
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <h4 class="font-medium truncate">Mal Taman Anggrek</h4>
+                                    <p class="text-sm text-gray-500 truncate">Jakarta Barat</p>
+                                </div>
+                                <div class="ml-4 flex items-center">
+                                    <span class="text-yellow-500 mr-1"><i class="fas fa-star"></i></span>
+                                    <span class="font-medium">4.6</span>
+                                </div>
+                            </div>
+                            <div class="flex items-center p-3 rounded-lg bg-gray-50 hover:bg-primary-50 transition-colors">
+                                <div class="flex-shrink-0 h-12 w-12 bg-pink-100 rounded-lg flex items-center justify-center text-pink-600 mr-4">
+                                    <i class="fas fa-train"></i>
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <h4 class="font-medium truncate">Stasiun Gambir</h4>
+                                    <p class="text-sm text-gray-500 truncate">Jakarta Pusat</p>
+                                </div>
+                                <div class="ml-4 flex items-center">
+                                    <span class="text-yellow-500 mr-1"><i class="fas fa-star"></i></span>
+                                    <span class="font-medium">4.5</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+    
+    <!-- Accessibility Button -->
+    <div class="accessibility-btn">
+        <button id="accessibilityBtn" class="bg-primary-600 text-white p-3 rounded-full shadow-lg hover:bg-primary-700 transition-colors">
+            <i class="fas fa-universal-access text-xl"></i>
+        </button>
+    </div>
+    
+    <!-- Accessibility Panel -->
+    <div id="accessibilityPanel" class="hidden fixed bottom-24 right-6 bg-white rounded-lg shadow-xl p-4 w-64 z-50">
+        <h3 class="font-bold text-lg mb-3 text-gray-800">Aksesibilitas</h3>
+        <div class="space-y-3">
+            <button id="increaseFontBtn" class="flex items-center w-full px-3 py-2 rounded-lg hover:bg-gray-100 text-gray-700">
+                <i class="fas fa-text-height mr-3"></i> Perbesar Teks
+            </button>
+            <button id="decreaseFontBtn" class="flex items-center w-full px-3 py-2 rounded-lg hover:bg-gray-100 text-gray-700">
+                <i class="fas fa-text-width mr-3"></i> Perkecil Teks
+            </button>
+            <button id="highContrastBtn" class="flex items-center w-full px-3 py-2 rounded-lg hover:bg-gray-100 text-gray-700">
+                <i class="fas fa-adjust mr-3"></i> Kontras Tinggi
+            </button>
+            <button id="grayscaleBtn" class="flex items-center w-full px-3 py-2 rounded-lg hover:bg-gray-100 text-gray-700">
+                <i class="fas fa-palette mr-3"></i> Grayscale
+            </button>
+        </div>
+    </div>
+    
+    <script>
+        // Toggle sidebar
+        const toggleSidebar = document.getElementById('toggleSidebar');
+        const sidebar = document.getElementById('sidebar');
+        
+        toggleSidebar.addEventListener('click', function() {
+            sidebar.classList.toggle('sidebar-minimized');
+        });
+        
+        // Toggle accessibility panel
+        const accessibilityBtn = document.getElementById('accessibilityBtn');
+        const accessibilityPanel = document.getElementById('accessibilityPanel');
+        
+        accessibilityBtn.addEventListener('click', function() {
+            accessibilityPanel.classList.toggle('hidden');
+        });
+        
+        // Accessibility features
+        const increaseFontBtn = document.getElementById('increaseFontBtn');
+        const decreaseFontBtn = document.getElementById('decreaseFontBtn');
+        const highContrastBtn = document.getElementById('highContrastBtn');
+        const grayscaleBtn = document.getElementById('grayscaleBtn');
+        const body = document.body;
+        
+        let fontSize = 1;
+        
+        increaseFontBtn.addEventListener('click', function() {
+            fontSize += 0.1;
+            if (fontSize > 1.5) fontSize = 1.5;
+            document.body.style.fontSize = `${fontSize}em`;
+        });
+        
+        decreaseFontBtn.addEventListener('click', 
+        function() {
+            fontSize -= 0.1;
+            if (fontSize < 0.7) fontSize = 0.7;
+            document.body.style.fontSize = `${fontSize}em`;
+        });
+        
+        highContrastBtn.addEventListener('click', function() {
+            body.classList.toggle('high-contrast');
+        });
+        
+        grayscaleBtn.addEventListener('click', function() {
+            body.classList.toggle('grayscale');
+        });
+    </script>
+</body>
+</html>

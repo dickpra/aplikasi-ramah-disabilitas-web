@@ -343,7 +343,7 @@ class AssignmentResource extends Resource
                     ->label('Dibuat Pada')
                     // ->toggleable(isToggledHiddenByDefault: true), 
             ])
-            ->defaultSort('created_at', 'desc')
+            ->defaultSort('created_at', 'asc')
             ->filters([
                 Tables\Filters\SelectFilter::make('location_id')->relationship('location', 'name')->label('Filter Lokasi'),
                 Tables\Filters\SelectFilter::make('assessor_id')->relationship('assessor', 'name')->label('Filter Asesor'), // Diubah
@@ -404,7 +404,7 @@ class AssignmentResource extends Resource
     {
         // Admin hanya bisa mengedit jika statusnya masih dalam alur kerja aktif.
         // Status final seperti 'completed', 'approved', atau 'cancelled' tidak bisa diedit lagi.
-        $editableStatuses = ['assigned', 'in_progress', 'revision_needed'];
+        $editableStatuses = ['assigned', 'in_progress', 'revision_needed', 'pending_review_admin'];
 
         return in_array($record->status, $editableStatuses);
     }

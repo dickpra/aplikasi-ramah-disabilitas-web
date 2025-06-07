@@ -6,6 +6,9 @@ use App\Models\Assignment;
 use Illuminate\Support\Facades\Log; // Untuk debugging jika perlu
 use App\Notifications\NewAssignmentNotification; // <-- Import notifikasi
 use App\Notifications\RevisionRequestNotification; // <-- Import notifikasi revisi
+use App\Models\Admin; // <-- 1. IMPORT model Admin
+use App\Notifications\AssessorSubmissionNotification; // <-- 2. IMPORT notifikasi baru
+use Illuminate\Support\Facades\Notification; // <-- 3. IMPORT Fassade Notifikasi
 
 
 class AssignmentObserver
@@ -15,6 +18,9 @@ class AssignmentObserver
      */
     public function updated(Assignment $assignment): void
     {
+
+        
+        
         // Cek apakah kolom 'status' baru saja diubah menjadi 'approved'
         if ($assignment->wasChanged('status') && $assignment->status === 'approved') {
             
@@ -37,6 +43,7 @@ class AssignmentObserver
                 }
             }
         }
+        
 
         if ($assignment->wasChanged('status')) {
             $newStatus = $assignment->status;
@@ -49,6 +56,8 @@ class AssignmentObserver
                 match ($newStatus) {
                     'revision_needed' => $assessor->notify(new RevisionRequestNotification($assignment)),
                     'approved' => null, // Anda bisa buat notifikasi 'Approved' di sini jika mau, contoh: $assessor->notify(new AssessmentApprovedNotification($assignment)),
+                    'pending_review_admin' => Notification::send(Admin::all(), new AssessorSubmissionNotification($assignment)),
+
                     // Status lain bisa ditambahkan di sini
                     default => Log::info("AssignmentObserver: Tidak ada notifikasi yang dikonfigurasi untuk status '{$newStatus}'.")
                 };
@@ -65,7 +74,9 @@ class AssignmentObserver
                     ]);
                 }
             }
+            
         }
+        
     }
 
     // Metode lain (created, deleted, etc.) bisa Anda biarkan kosong jika tidak digunakan

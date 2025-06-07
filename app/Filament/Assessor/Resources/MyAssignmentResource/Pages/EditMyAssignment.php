@@ -213,7 +213,7 @@ class EditMyAssignment extends EditRecord
                         return;
                     }
 
-                    $currentRecord->status = 'completed';
+                    $currentRecord->status = 'pending_review_admin'; // Ubah status menjadi 'pending_review'
                     $currentRecord->save(); // Simpan perubahan status
                     Notification::make()->success()->title('Penilaian Terkirim')->body('Hasil penilaian berhasil dikirim.')->send();
                     $this->redirect(MyAssignmentResource::getUrl('index'));

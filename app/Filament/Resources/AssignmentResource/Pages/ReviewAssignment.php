@@ -17,6 +17,9 @@ use App\Models\AssessmentScore;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use App\Notifications\AssessmentApprovedNotification; // <-- 1. IMPORT NOTIFIKASI BARU
+
+
 
 class ReviewAssignment extends Page
 {
@@ -150,6 +153,19 @@ class ReviewAssignment extends Page
                 ->action(function () {
                     $this->record->update(['status' => 'approved']);
                     Notification::make()->success()->title('Penilaian Disetujui')->send();
+                    // 2. Kirim notifikasi ke asesor
+                    if ($this->record->assessor) {
+                        $this->record->assessor->notify(new AssessmentApprovedNotification($this->record));
+                    }
+                    
+                    // 3. Tampilkan notifikasi pop-up untuk admin
+                    Notification::make()
+                        ->success()
+                        ->title('Penilaian Disetujui')
+                        ->body('Status penugasan telah diubah dan skor akhir lokasi telah diperbarui.')
+                        ->send();
+                    
+                    // 4. Redirect kembali ke halaman index
                     $this->redirect(AssignmentResource::getUrl('index'));
                 })->visible(fn (): bool => in_array($this->record->status, ['completed', 'pending_review_admin'])),
             Action::make('requestRevision')

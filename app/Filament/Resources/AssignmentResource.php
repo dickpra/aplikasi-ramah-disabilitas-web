@@ -343,7 +343,7 @@ class AssignmentResource extends Resource
                     ->label('Dibuat Pada')
                     // ->toggleable(isToggledHiddenByDefault: true), 
             ])
-            ->defaultSort('created_at', 'asc')
+            ->defaultSort('created_at', 'desc')
             ->filters([
                 Tables\Filters\SelectFilter::make('location_id')->relationship('location', 'name')->label('Filter Lokasi'),
                 Tables\Filters\SelectFilter::make('assessor_id')->relationship('assessor', 'name')->label('Filter Asesor'), // Diubah

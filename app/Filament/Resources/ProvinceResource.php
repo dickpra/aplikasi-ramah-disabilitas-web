@@ -12,6 +12,7 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Validation\Rules\Unique; // <-- Import
 
 class ProvinceResource extends Resource
 {
@@ -36,7 +37,15 @@ class ProvinceResource extends Resource
                 Forms\Components\TextInput::make('name')
                     ->required()
                     ->maxLength(255)
-                    ->label('Nama Provinsi'),
+                    ->label('Nama Provinsi')
+                    ->rules([ // <-- Tambahkan aturan validasi
+                    fn (Forms\Get $get): Unique => (new Unique('provinces', 'name'))
+                        ->where('country_id', $get('country_id'))
+                        ->ignore($form->getModelInstance()),
+                ])
+                ->validationMessages([
+                    'unique' => 'Nama provinsi ini sudah ada di negara yang dipilih.',
+                ]),
             ]);
     }
 

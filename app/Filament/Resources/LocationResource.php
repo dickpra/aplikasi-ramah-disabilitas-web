@@ -12,6 +12,15 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\Collection;
+use App\Models\Country;
+use App\Models\Province;
+use Filament\Forms\Set;
+use Filament\Forms\Get;
+use Filament\Tables\Columns;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rules\Unique; // <-- Import untuk aturan unik
+
 
 class LocationResource extends Resource
 {
@@ -28,48 +37,106 @@ class LocationResource extends Resource
                 Forms\Components\TextInput::make('name')
                     ->required()
                     ->maxLength(255)
-                    ->label('Nama Lokasi'),
-                // Forms\Components\TextInput::make('location_type')
-                //     ->required() // Jadikan required jika tipe selalu ada
-                //     ->maxLength(255)
-                //     ->label('Jenis Lokasi')
-                //     ->helperText('Contoh: Kota, Kabupaten, Perguruan Tinggi, Sekolah, Taman, dll.'),
-                    // Anda bisa ganti dengan Select jika jenisnya baku:
-                    Forms\Components\Select::make('location_type')
-                        // ->options([
-                        //     'city' => 'Kota',
-                        //     'regency' => 'Kabupaten',
-                        //     'university' => 'Perguruan Tinggi',
-                        //     'school' => 'Sekolah',
-                        //     'public_space' => 'Ruang Publik',
-                        // ])
+                    ->label('Nama Lokasi')
+                    ->rules([
+                    fn (Forms\Get $get): Unique => (new Unique('locations', 'name'))
+                        ->where('province_id', $get('province_id'))
+                        ->ignore($form->getModelInstance()),
+                ])
+                ->validationMessages([
+                    'unique' => 'Nama lokasi ini sudah ada di provinsi yang dipilih.',
+                ]),
+                
+                Forms\Components\Select::make('location_type')
                     ->options([
-                            'Kota' => 'Kota',
-                            'Kabupaten' => 'Kabupaten',
-                            'Perguruan Tinggi' => 'Perguruan Tinggi',
-                            'Sekolah' => 'Sekolah',
-                            'Ruang Publik' => 'Ruang Publik',
-                        ])
-                        ->required()
-                        ->label('Jenis Lokasi'),
-
-                Forms\Components\Select::make('province_id')
-                    ->relationship('province', 'name')
-                    ->searchable()
-                    ->preload()
+                        'Kota' => 'Kota',
+                        'Kabupaten' => 'Kabupaten',
+                        'Perguruan Tinggi' => 'Perguruan Tinggi',
+                        'Sekolah' => 'Sekolah',
+                        'Ruang Publik' => 'Ruang Publik',
+                    ])
                     ->required()
+                    ->label('Jenis Lokasi'),
+                
+                // --- FIELD BARU: PEMILIHAN NEGARA ---
+                Forms\Components\Select::make('country_id')
+                    ->label('Negara')
+                    ->options(Country::query()->pluck('name', 'id'))
+                    ->live() // <-- Membuat field ini "live" atau reaktif
+                    ->afterStateUpdated(fn (Set $set) => $set('province_id', null)) // Reset pilihan provinsi jika negara diubah
+                    ->searchable()
+                    ->required()
+                    ->dehydrated(false), // Penting: agar field ini tidak disimpan ke tabel 'locations'
+                
+                // --- FIELD PROVINSI YANG DISESUAIKAN ---
+                Forms\Components\Select::make('province_id')
                     ->label('Provinsi')
-                    ->createOptionForm(fn(Form $form) => \App\Filament\Resources\ProvinceResource::form($form)) // Menggunakan form dari ProvinceResource
-                    ->createOptionModalHeading('Buat Provinsi Baru'),
-                    
-
-                // Tambahkan field opsional lain yang sudah ada di tabel locations jika ingin diinput dari sini
-                // Misalnya, jika Anda menambahkan 'address', 'latitude', 'longitude' ke tabel locations di masa depan.
-                // Forms\Components\Textarea::make('address')->columnSpanFull(),
-                // Forms\Components\TextInput::make('latitude')->numeric(),
-                // Forms\Components\TextInput::make('longitude')->numeric(),
+                    // Opsi provinsi sekarang bergantung pada pilihan negara
+                    ->options(function (Get $get): Collection {
+                        $countryId = $get('country_id'); // Ambil ID negara yang dipilih
+                        if (!$countryId) {
+                            return collect(); // Jika tidak ada negara dipilih, kosongkan pilihan provinsi
+                        }
+                        return Province::query()
+                            ->where('country_id', $countryId)
+                            ->pluck('name', 'id');
+                    })
+                    ->searchable()
+                    ->required()
+                    // ->createOptionForm(...) // Untuk saat ini kita nonaktifkan createable province di sini
+                                             // karena perlu penanganan lebih lanjut untuk dependent field
+                    ->label('Provinsi'),
             ]);
     }
+    // public static function form(Form $form): Form
+    // {
+    //     return $form
+    //         ->schema([
+    //             Forms\Components\TextInput::make('name')
+    //                 ->required()
+    //                 ->maxLength(255)
+    //                 ->label('Nama Lokasi'),
+    //             // Forms\Components\TextInput::make('location_type')
+    //             //     ->required() // Jadikan required jika tipe selalu ada
+    //             //     ->maxLength(255)
+    //             //     ->label('Jenis Lokasi')
+    //             //     ->helperText('Contoh: Kota, Kabupaten, Perguruan Tinggi, Sekolah, Taman, dll.'),
+    //                 // Anda bisa ganti dengan Select jika jenisnya baku:
+    //                 Forms\Components\Select::make('location_type')
+    //                     // ->options([
+    //                     //     'city' => 'Kota',
+    //                     //     'regency' => 'Kabupaten',
+    //                     //     'university' => 'Perguruan Tinggi',
+    //                     //     'school' => 'Sekolah',
+    //                     //     'public_space' => 'Ruang Publik',
+    //                     // ])
+    //                 ->options([
+    //                         'Kota' => 'Kota',
+    //                         'Kabupaten' => 'Kabupaten',
+    //                         'Perguruan Tinggi' => 'Perguruan Tinggi',
+    //                         'Sekolah' => 'Sekolah',
+    //                         'Ruang Publik' => 'Ruang Publik',
+    //                     ])
+    //                     ->required()
+    //                     ->label('Jenis Lokasi'),
+
+    //             Forms\Components\Select::make('province_id')
+    //                 ->relationship('province', 'name')
+    //                 ->searchable()
+    //                 ->preload()
+    //                 ->required()
+    //                 ->label('Provinsi')
+    //                 ->createOptionForm(fn(Form $form) => \App\Filament\Resources\ProvinceResource::form($form)) // Menggunakan form dari ProvinceResource
+    //                 ->createOptionModalHeading('Buat Provinsi Baru'),
+                    
+
+    //             // Tambahkan field opsional lain yang sudah ada di tabel locations jika ingin diinput dari sini
+    //             // Misalnya, jika Anda menambahkan 'address', 'latitude', 'longitude' ke tabel locations di masa depan.
+    //             // Forms\Components\Textarea::make('address')->columnSpanFull(),
+    //             // Forms\Components\TextInput::make('latitude')->numeric(),
+    //             // Forms\Components\TextInput::make('longitude')->numeric(),
+    //         ]);
+    // }
 
     public static function table(Table $table): Table
     {

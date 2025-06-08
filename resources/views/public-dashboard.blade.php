@@ -175,7 +175,11 @@
 
             {{-- === TOMBOL LOGIN BARU === --}}
             <div class="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
+<<<<<<< HEAD
                 <a href="{{ url(config('filament.panels.administrator.path', '/administrator/login')) }}"  
+=======
+                <a href="{{ url(config('filament.panels.administrator.path', '/administrator/login')) }}" 
+>>>>>>> e85274d (fix nambah lokasi & provinsi ganda)
                    class="w-full sm:w-auto inline-block px-8 py-3 text-base font-medium text-center text-white bg-blue-500 rounded-lg hover:bg-blue-600 focus:ring-4 focus:ring-blue-300 dark:focus:ring-blue-900 transition-transform hover:scale-105">
                     Login sebagai Admin
                 </a>

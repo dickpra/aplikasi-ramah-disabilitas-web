@@ -31,67 +31,85 @@ class LocationResource extends Resource
     protected static ?int $navigationSort = 3; // Atur urutan jika perlu
 
     public static function form(Form $form): Form
-    {
-        return $form
-            ->schema([
-                Forms\Components\TextInput::make('name')
-                    ->required()
-                    ->maxLength(255)
-                    ->label('Nama Lokasi')
-                    ->rules([
-                    fn (Forms\Get $get): Unique => (new Unique('locations', 'name'))
+{
+    return $form
+        ->schema([
+            Forms\Components\TextInput::make('name')
+                ->required()->maxLength(255)->label('Nama Lokasi')
+                ->rules([
+                    fn (Get $get): Unique => (new Unique('locations', 'name'))
                         ->where('province_id', $get('province_id'))
                         ->ignore($form->getModelInstance()),
                 ])
-                ->validationMessages([
-                    'unique' => 'Nama lokasi ini sudah ada di provinsi yang dipilih.',
-                ]),
-                
-                Forms\Components\Select::make('location_type')
-                    ->options([
-                        'Kota' => 'Kota',
-                        'Kabupaten' => 'Kabupaten',
-                        'Perguruan Tinggi' => 'Perguruan Tinggi',
-                        'Sekolah' => 'Sekolah',
-                        'Ruang Publik' => 'Ruang Publik',
-                    ])
-                    ->required()
-                    ->label('Jenis Lokasi'),
-                
-                // --- FIELD BARU: PEMILIHAN NEGARA ---
-                Forms\Components\Select::make('country_id')
+                ->validationMessages(['unique' => 'Nama lokasi ini sudah ada di provinsi yang dipilih.']),
+            
+            Forms\Components\Select::make('location_type')
+                ->options([
+                    'Kota' => 'Kota', 'Kabupaten' => 'Kabupaten', 'Perguruan Tinggi' => 'Perguruan Tinggi',
+                    'Sekolah' => 'Sekolah', 'Ruang Publik' => 'Ruang Publik',
+                ])
+                ->required()->label('Jenis Lokasi'),
+            
+            // --- FIELD PEMILIHAN NEGARA (Sudah Benar) ---
+            Forms\Components\Select::make('country_id')
                     ->label('Negara')
                     ->options(Country::query()->pluck('name', 'id'))
-                    ->live() // <-- Membuat field ini "live" atau reaktif
-                    ->afterStateUpdated(fn (Set $set) => $set('province_id', null)) // Reset pilihan provinsi jika negara diubah
+                    ->live()
+                    ->afterStateUpdated(fn (Set $set) => $set('province_id', null))
                     ->searchable()
                     ->required()
-                    ->dehydrated(false) // Penting: agar field ini tidak disimpan ke tabel 'locations'
-                    ->createOptionForm(fn(Form $form) => \App\Filament\Resources\CountryResource::form($form)) // Menggunakan form dari ProvinceResource
-                    ->createOptionModalHeading('Buat Provinsi Baru'),
-                
-                // --- FIELD PROVINSI YANG DISESUAIKAN ---
-                Forms\Components\Select::make('province_id')
+                    ->dehydrated(false)
+                    ->createOptionForm([
+                        Forms\Components\TextInput::make('name')
+                            ->required()
+                            ->label('Nama Negara'),
+                        Forms\Components\TextInput::make('code')
+                            ->label('Kode Negara'),
+                    ])
+                    ->createOptionModalHeading('Buat Negara Baru')
+                    // --- TAMBAHKAN METODE INI ---
+                    ->createOptionUsing(function (array $data): int {
+                        // Logika untuk membuat record Country baru
+                        $newCountry = Country::create($data);
+                        // Kembalikan ID dari record yang baru dibuat
+                        return $newCountry->id;
+                    }),
+            
+            // --- FIELD PROVINSI YANG DIPERBAIKI ---
+            Forms\Components\Select::make('province_id')
                     ->label('Provinsi')
-                    // Opsi provinsi sekarang bergantung pada pilihan negara
                     ->options(function (Get $get): Collection {
-                        $countryId = $get('country_id'); // Ambil ID negara yang dipilih
+                        $countryId = $get('country_id');
                         if (!$countryId) {
-                            return collect(); // Jika tidak ada negara dipilih, kosongkan pilihan provinsi
+                            return collect();
                         }
-                        return Province::query()
-                            ->where('country_id', $countryId)
-                            ->pluck('name', 'id');
+                        return Province::query()->where('country_id', $countryId)->pluck('name', 'id');
                     })
                     ->searchable()
                     ->required()
-                    ->createOptionForm(fn(Form $form) => \App\Filament\Resources\ProvinceResource::form($form)) // Menggunakan form dari ProvinceResource
+                    ->createOptionForm(function (Form $form, Get $get) {
+                        return $form->schema([
+                            // Field country_id sudah otomatis ada dari createOptionUsing,
+                            // jadi kita tidak perlu menampilkannya di form modal.
+                            Forms\Components\TextInput::make('name')
+                                ->required()
+                                ->label('Nama Provinsi Baru')
+                                ->rules([
+                                    fn (): Unique => (new Unique('provinces', 'name'))
+                                        ->where('country_id', $get('country_id')),
+                                ]),
+                        ]);
+                    })
                     ->createOptionModalHeading('Buat Provinsi Baru')
-                    // ->createOptionForm(...) // Untuk saat ini kita nonaktifkan createable province di sini
-                                             // karena perlu penanganan lebih lanjut untuk dependent field
-                    ->label('Provinsi'),
+                    // --- TAMBAHKAN METODE INI ---
+                    ->createOptionUsing(function (array $data, Get $get): int {
+                        // Ambil country_id dari form utama dan gabungkan dengan data dari form modal
+                        $data['country_id'] = $get('country_id');
+                        $newProvince = Province::create($data);
+                        return $newProvince->id;
+                    }),
             ]);
-    }
+}
     // public static function form(Form $form): Form
     // {
     //     return $form

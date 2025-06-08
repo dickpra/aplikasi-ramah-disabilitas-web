@@ -66,7 +66,9 @@ class LocationResource extends Resource
                     ->afterStateUpdated(fn (Set $set) => $set('province_id', null)) // Reset pilihan provinsi jika negara diubah
                     ->searchable()
                     ->required()
-                    ->dehydrated(false), // Penting: agar field ini tidak disimpan ke tabel 'locations'
+                    ->dehydrated(false) // Penting: agar field ini tidak disimpan ke tabel 'locations'
+                    ->createOptionForm(fn(Form $form) => \App\Filament\Resources\CountryResource::form($form)) // Menggunakan form dari ProvinceResource
+                    ->createOptionModalHeading('Buat Provinsi Baru'),
                 
                 // --- FIELD PROVINSI YANG DISESUAIKAN ---
                 Forms\Components\Select::make('province_id')
@@ -83,6 +85,8 @@ class LocationResource extends Resource
                     })
                     ->searchable()
                     ->required()
+                    ->createOptionForm(fn(Form $form) => \App\Filament\Resources\ProvinceResource::form($form)) // Menggunakan form dari ProvinceResource
+                    ->createOptionModalHeading('Buat Provinsi Baru')
                     // ->createOptionForm(...) // Untuk saat ini kita nonaktifkan createable province di sini
                                              // karena perlu penanganan lebih lanjut untuk dependent field
                     ->label('Provinsi'),

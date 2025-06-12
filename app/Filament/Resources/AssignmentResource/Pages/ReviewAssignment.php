@@ -27,7 +27,12 @@ class ReviewAssignment extends Page
 
     protected static string $resource = AssignmentResource::class;
     protected static string $view = 'filament.resources.assignment-resource.pages.review-assignment';
-    protected static ?string $title = 'Review Hasil Penilaian';
+    // protected static ?string $title = null;
+
+    public function getTitle(): string
+    {
+        return __('Review Hasil Penilaian');
+    }
 
     public function mount(int | string $record): void
     {
@@ -41,30 +46,30 @@ class ReviewAssignment extends Page
         return $infolist
             ->record($this->record)
             ->schema([
-                InfolistComponents\Section::make('Informasi Penugasan')
+                InfolistComponents\Section::make(__('Informasi Penugasan'))
                     ->columns(3)
                     ->schema([
-                        InfolistComponents\TextEntry::make('location.name')->label('Lokasi'),
-                        InfolistComponents\TextEntry::make('assessor.name')->label('Asesor'),
-                        InfolistComponents\TextEntry::make('status')->label('Status')->badge()
+                        InfolistComponents\TextEntry::make('location.name')->label(__('Lokasi')),
+                        InfolistComponents\TextEntry::make('assessor.name')->label(__('Asesor')),
+                        InfolistComponents\TextEntry::make('status')->label(__('Status'))->badge()
                             ->color(fn ($state): string => match ($state ?? '') {
                                 'assigned' => 'primary', 'in_progress' => 'warning', 'completed' => 'info',
                                 'pending_review_admin' => 'warning', 'approved' => 'success', 'revision_needed' => 'danger',
                                 'cancelled' => 'gray', default => 'secondary',
                             }),
-                        InfolistComponents\TextEntry::make('assignment_date')->date('d M Y')->label('Tgl Penugasan'),
-                        InfolistComponents\TextEntry::make('due_date')->date('d M Y')->label('Batas Waktu')->placeholder('Tidak Ada Batasan'),
-                        InfolistComponents\TextEntry::make('updated_at')->dateTime('d M Y H:i')->label('Terakhir Disubmit'),
+                        InfolistComponents\TextEntry::make('assignment_date')->date('d M Y')->label(__('Tgl Penugasan')),
+                        InfolistComponents\TextEntry::make('due_date')->date('d M Y')->label(__('Batas Waktu'))->placeholder(__('Tidak Ada Batasan')),
+                        InfolistComponents\TextEntry::make('updated_at')->dateTime('d M Y H:i')->label(__('Terakhir Disubmit')),
                         InfolistComponents\TextEntry::make('final_score')
-                        ->label('Skor Akhir Penilaian')
+                        ->label(__('Skor Akhir Penilaian'))
                         ->weight('bold') // Buat tebal agar menonjol
                         ->size('lg')     // Buat ukuran font lebih besar
                         ->badge()
                         ->color('primary')
-                        ->placeholder('Belum Dihitung'),
+                        ->placeholder(__('Belum Dihitung')),
                     ]),
 
-                InfolistComponents\Section::make('Hasil Penilaian Indikator oleh Asesor')
+                InfolistComponents\Section::make(__('Hasil Penilaian Indikator oleh Asesor'))
                     ->schema([
                         InfolistComponents\RepeatableEntry::make('assessmentScores')
                             ->label(false)
@@ -75,32 +80,32 @@ class ReviewAssignment extends Page
                                     // Info Indikator dan Catatan di kolom utama
                                     InfolistComponents\Grid::make(1)->columnSpan(2)->schema([
                                         InfolistComponents\TextEntry::make('indicator.name')
-                                            ->label('Indikator')
+                                            ->label(__('Indikator'))
                                             ->formatStateUsing(fn (?AssessmentScore $record) => $record?->indicator?->name)
                                             ->weight('bold'),
                                         InfolistComponents\TextEntry::make('indicator.category')
-                                            ->label('Kategori')
+                                            ->label(__('Kategori'))
                                             ->badge(),
                                         InfolistComponents\TextEntry::make('indicator.scoring_criteria_text')
-                                            ->label('Kriteria Penilaian')
+                                            ->label(__('Kriteria Penilaian'))
                                             ->formatStateUsing(fn ($state) => new HtmlString(nl2br(e($state))))
                                             ->color('gray')
                                             ->extraAttributes(['class' => 'text-xs']),
                                         InfolistComponents\TextEntry::make('assessor_notes')
-                                            ->label('Catatan dari Asesor')
+                                            ->label(__('Catatan dari Asesor'))
                                             ->visible(fn ($state) => !empty($state))
                                             ->formatStateUsing(fn ($state): string => $state ? nl2br(e($state)) : '-'),
                                     ]),
                                     // Skor dan Bobot di kolom samping
                                     InfolistComponents\Grid::make(1)->columnSpan(1)->schema([
-                                        InfolistComponents\TextEntry::make('score')->label('Skor Diberikan')->badge()->size('lg'),
-                                        InfolistComponents\TextEntry::make('indicator.weight')->label('Bobot Indikator')->badge()->color('gray'),
+                                        InfolistComponents\TextEntry::make('score')->label(__('Skor Diberikan'))->badge()->size('lg'),
+                                        InfolistComponents\TextEntry::make('indicator.weight')->label(__('Bobot Indikator'))->badge()->color('gray'),
                                     ]),
                                 ]),
                                 
                                 // Repeater untuk Bukti Pendukung
                                 InfolistComponents\RepeatableEntry::make('evidences')
-                                    ->label('Bukti Pendukung')
+                                    ->label(__('Bukti Pendukung'))
                                     ->columnSpanFull()
                                     ->contained(true)
                                     ->visible(fn (AssessmentScore $record) => $record->evidences->count() > 0)
@@ -148,11 +153,13 @@ class ReviewAssignment extends Page
     {
         return [
             Action::make('approveAssessment')
-                ->label('Setujui Penilaian')->color('success')->icon('heroicon-o-check-badge')
-                ->requiresConfirmation()->modalDescription('Apakah Anda yakin ingin menyetujui hasil penilaian ini? Status akan menjadi "Approved" dan final.')
+                ->label(__('Setujui Penilaian'))
+                ->color('success')
+                ->icon('heroicon-o-check-badge')
+                ->requiresConfirmation()->modalDescription(__('Apakah Anda yakin ingin menyetujui hasil penilaian ini? Status akan menjadi "Approved" dan final.'))
                 ->action(function () {
                     $this->record->update(['status' => 'approved']);
-                    Notification::make()->success()->title('Penilaian Disetujui')->send();
+                    Notification::make()->success()->title(__('Penilaian Disetujui'))->send();
                     // 2. Kirim notifikasi ke asesor
                     if ($this->record->assessor) {
                         $this->record->assessor->notify(new AssessmentApprovedNotification($this->record));
@@ -161,25 +168,25 @@ class ReviewAssignment extends Page
                     // 3. Tampilkan notifikasi pop-up untuk admin
                     Notification::make()
                         ->success()
-                        ->title('Penilaian Disetujui')
-                        ->body('Status penugasan telah diubah dan skor akhir lokasi telah diperbarui.')
+                        ->title(__('Penilaian Disetujui'))
+                        ->body(__('Status penugasan telah diubah dan skor akhir lokasi telah diperbarui.'))
                         ->send();
                     
                     // 4. Redirect kembali ke halaman index
                     $this->redirect(AssignmentResource::getUrl('index'));
                 })->visible(fn (): bool => in_array($this->record->status, ['completed', 'pending_review_admin'])),
             Action::make('requestRevision')
-                ->label('Minta Revisi')->color('danger')->icon('heroicon-o-arrow-uturn-left')
+                ->label(__('Minta Revisi'))->color('danger')->icon('heroicon-o-arrow-uturn-left')
                 ->requiresConfirmation()
                 ->form([
-                    FormComponents\Textarea::make('revision_notes')->label('Catatan untuk Revisi')->required()->helperText('Tuliskan catatan untuk asesor mengenai bagian mana yang perlu diperbaiki.'),
+                    FormComponents\Textarea::make('revision_notes')->label(__('Catatan untuk Revisi'))->required()->helperText(__('Tuliskan catatan untuk asesor mengenai bagian mana yang perlu diperbaiki.')),
                 ])
                 ->action(function (array $data) {
                     $this->record->update([
                         'status' => 'revision_needed',
                         'notes' => ($this->record->notes ? $this->record->notes . "\n\n" : "") . "[REVISI " . now()->format('d/m/Y H:i') . "]:\n" . $data['revision_notes'],
                     ]);
-                    Notification::make()->success()->title('Permintaan Revisi Terkirim')->send();
+                    Notification::make()->success()->title(__('Permintaan Revisi Terkirim'))->send();
                     $this->redirect(AssignmentResource::getUrl('index'));
                 })->visible(fn (): bool => in_array($this->record->status, ['completed', 'pending_review_admin'])),
         ];

@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
+    <link rel="icon" type="image/png" href="{{ asset('img/favicon.png') }}">
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Indeks Inklusi | Peta Peringkat Lokasi</title>
 
@@ -65,8 +66,16 @@
 <body class="bg-gray-100 text-gray-900 font-sans">
 
     <header class="bg-white shadow-sm sticky top-0 z-20">
-        <div class="container mx-auto px-6 py-4 flex items-center justify-between">
+        {{-- <div class="container mx-auto px-6 py-4 flex items-center justify-between">
             <a href="{{ route('dashboard.public') }}" class="text-2xl font-bold text-blue-700">Indeks Inklusi</a>
+            <nav>
+                <a href="{{ route('dashboard.public') }}" class="text-gray-600 hover:text-blue-700 font-medium">Kembali ke Dashboard</a>
+            </nav>
+        </div> --}}
+        <div class="container mx-auto px-6 py-4 flex items-center justify-between">
+            <a href="{{ route('dashboard.public') }}">
+                <img src="{{ asset('img/navbar.png') }}" alt="Logo Indeks Inklusi" class="h-10"> {{-- Sesuaikan tinggi (h-10) sesuai kebutuhan Anda --}}
+            </a>
             <nav>
                 <a href="{{ route('dashboard.public') }}" class="text-gray-600 hover:text-blue-700 font-medium">Kembali ke Dashboard</a>
             </nav>

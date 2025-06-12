@@ -180,23 +180,23 @@ class EditMyAssignment extends EditRecord
         $record = $this->getRecord();
         return [
             Actions\Action::make('saveProgress')
-                ->label('Simpan Progres')
+                ->label(__('Simpan Progres'))
                 ->action('save') 
                 ->color('gray')
                 ->visible(fn (): bool => in_array($this->getRecord()->status, MyAssignmentResource::ACTIVE_STATUSES)),
 
             Actions\Action::make('submitAssessment')
-                ->label('Selesaikan & Kirim Penilaian')
+                ->label(__('Selesaikan & Kirim Penilaian'))
                 ->icon('heroicon-o-check-circle')->color('success')->requiresConfirmation()
-                ->modalHeading('Kirim Hasil Penilaian?')->modalDescription('Pastikan semua indikator sudah terisi dengan benar...')
+                ->modalHeading(__('Kirim Hasil Penilaian?'))->modalDescription(__('Pastikan semua indikator sudah terisi dengan benar...'))
                 ->action(function () {
                     $this->save(); 
                     $currentRecord = $this->getRecord();
                     $currentRecord->refresh()->load('assessmentScores'); 
                     
                     $location = $currentRecord->location;
-                    if (!$location) { Notification::make()->danger()->title('Error')->body('Lokasi tidak ditemukan.')->send(); return; }
-                    
+                    if (!$location) { Notification::make()->danger()->title(__('Error'))->body(__('Lokasi tidak ditemukan.'))->send(); return; }
+
                     $relevantIndicatorIds = Indicator::where(function ($q) use ($location) {
                         $q->where('target_location_type', $location->location_type)->orWhere('target_location_type', 'all');
                     })->where('is_active', true)->pluck('id');
@@ -207,15 +207,18 @@ class EditMyAssignment extends EditRecord
                         ->count();
                     
                     if ($scoredCount < $relevantIndicatorIds->count()) {
-                        Notification::make()->danger()->title('Penilaian Belum Lengkap')
-                            ->body("Harap isi skor untuk semua ({$relevantIndicatorIds->count()}) indikator relevan. Baru terisi {$scoredCount}.")
+                        Notification::make()->danger()->title(__('Penilaian Belum Lengkap'))
+                            ->body(__('Harap isi skor untuk semua (:total indikator relevan. Baru terisi :filled.', [
+                                'total' => $relevantIndicatorIds->count(),
+                                'filled' => $scoredCount,
+                            ]))
                             ->send();
                         return;
                     }
 
                     $currentRecord->status = 'pending_review_admin'; // Ubah status menjadi 'pending_review'
                     $currentRecord->save(); // Simpan perubahan status
-                    Notification::make()->success()->title('Penilaian Terkirim')->body('Hasil penilaian berhasil dikirim.')->send();
+                    Notification::make()->success()->title(__('Penilaian Terkirim'))->body(__('Hasil penilaian berhasil dikirim.'))->send();
                     $this->redirect(MyAssignmentResource::getUrl('index'));
                 })
                 ->visible(fn (): bool => in_array($this->getRecord()->status, MyAssignmentResource::ACTIVE_STATUSES)),
@@ -236,7 +239,7 @@ class EditMyAssignment extends EditRecord
     {
         return Notification::make()
             ->success()
-            ->title('Progres Disimpan')
-            ->body('Perubahan pada penilaian Anda telah berhasil disimpan.');
+            ->title(__('Progres Disimpan'))
+            ->body(__('Perubahan pada penilaian Anda telah berhasil disimpan.'));
     }
 }

@@ -19,11 +19,11 @@ class ListLocations extends ListRecords
 
             // --- AKSI BARU UNTUK MENGHITUNG SKOR ---
             Actions\Action::make('calculateAllScores')
-                ->label('Hitung Ulang Semua Skor & Peringkat')
+                ->label(__('Hitung Ulang Semua Skor & Peringkat'))
                 ->icon('heroicon-o-calculator')
                 ->color('warning')
                 ->requiresConfirmation()
-                ->modalDescription('Proses ini akan menghitung ulang skor akhir dan peringkat untuk semua lokasi yang penilaiannya sudah disetujui. Lanjutkan?')
+                ->modalDescription(__('Proses ini akan menghitung ulang skor akhir dan peringkat untuk semua lokasi yang penilaiannya sudah disetujui. Lanjutkan?'))
                 ->action(function () {
                     $locationsToRecalculate = Location::whereHas('assignments', fn($q) => $q->where('status', 'approved'))->get();
                     $count = 0;
@@ -38,8 +38,8 @@ class ListLocations extends ListRecords
                     }
                     Notification::make()
                         ->success()
-                        ->title('Perhitungan Selesai')
-                        ->body("{$count} lokasi telah berhasil dihitung ulang skornya.")
+                        ->title(__('Perhitungan Selesai'))
+                        ->body(__("{$count} lokasi telah berhasil dihitung ulang skornya."))
                         ->send();
                 }),
         ];

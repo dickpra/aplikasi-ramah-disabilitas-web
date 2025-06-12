@@ -18,8 +18,24 @@ class CountryResource extends Resource
     protected static ?string $model = Country::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-flag';
-    protected static ?string $navigationGroup = 'Entitas'; // Grup navigasi
+    // protected static ?string $navigationGroup = 'Entitas'; // Grup navigasi
     protected static ?int $navigationSort = 1; // Urutan di grup
+    public static function getNavigationGroup(): ?string
+    {
+        return __('Entitas');
+    }
+    public static function getNavigationLabel(): string
+    {
+        return __('Negara');
+    }
+    public static function getPluralModelLabel(): string
+    {
+        return __('Negara');
+    }
+    public static function getModelLabel(): string
+    {
+        return __('Negara');
+    }
 
     public static function form(Form $form): Form
     {
@@ -29,11 +45,11 @@ class CountryResource extends Resource
                     ->required()
                     ->maxLength(255)
                     ->unique(ignoreRecord: true, table: 'countries', column: 'name') // Pastikan nama unik
-                    ->label('Nama Negara'),
+                    ->label(__('Nama Negara')),
                 Forms\Components\TextInput::make('code')
                     ->maxLength(10)
                     ->unique(ignoreRecord: true, table: 'countries', column: 'code') // Pastikan kode unik
-                    ->label('Kode Negara (Singkat)'),
+                    ->label(__('Kode Negara (Singkat)')),
             ]);
     }
 
@@ -41,8 +57,14 @@ class CountryResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('name')->searchable()->sortable(),
-                Tables\Columns\TextColumn::make('code')->searchable()->sortable(),
+                Tables\Columns\TextColumn::make('name')
+                ->label(__('Nama'))
+                ->searchable()
+                ->sortable(),
+                Tables\Columns\TextColumn::make('code')
+                ->label(__('Kode'))
+                ->searchable()
+                ->sortable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()

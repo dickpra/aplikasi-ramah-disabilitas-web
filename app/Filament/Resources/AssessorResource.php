@@ -20,26 +20,43 @@ class AssessorResource extends Resource
     protected static ?string $model = Assessor::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-users'; // Icon untuk user/asesor
-    protected static ?string $navigationLabel = 'Manajemen Asesor'; // Label di navigasi
-    protected static ?string $navigationGroup = 'Pengguna'; // Grup navigasi (opsional)
+    // protected static ?string $navigationLabel = 'Manajemen Asesor'; // Label di navigasi
+    // protected static ?string $navigationGroup = 'Pengguna'; // Grup navigasi (opsional)
     // protected static ?string $recordTitleAttribute = 'name'; // Menampilkan nama di breadcrumb saat edit (opsional)
+    protected static ?int $navigationSort = 3;
+    public static function getNavigationGroup(): ?string
+    {
+        return __('Pengguna'); // Grup navigasi untuk Asesor
+    }
+    public static function getNavigationLabel(): string
+    {
+        return __('Manajemen Asesor');
+    }
+    public static function getPluralModelLabel(): string
+    {
+        return __('Manajemen Asesor');
+    }
+    public static function getModelLabel(): string
+    {
+        return __('Asesor');
+    }
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
                 Forms\Components\TextInput::make('name')
-                    ->label('Nama Lengkap')
+                    ->label(__('Nama Lengkap'))
                     ->required()
                     ->maxLength(255),
                 Forms\Components\TextInput::make('email')
-                    ->label('Alamat Email')
+                    ->label(__('Alamat Email'))
                     ->email()
                     ->required()
                     ->maxLength(255)
                     ->unique(ignoreRecord: true), // Email harus unik, kecuali untuk record yang sedang diedit
                 Forms\Components\TextInput::make('password')
-                    ->label('Password')
+                    ->label(__('Password'))
                     ->password()
                     // Hanya wajib diisi saat membuat asesor baru
                     ->required(fn (string $context): bool => $context === 'create')
@@ -47,7 +64,7 @@ class AssessorResource extends Resource
                     ->dehydrateStateUsing(fn ($state) => filled($state) ? Hash::make($state) : null)
                     ->dehydrated(fn ($state) => filled($state)) // Hanya kirim ke database jika diisi
                     ->maxLength(255)
-                    ->helperText('Kosongkan jika tidak ingin mengubah password saat edit.'),
+                    ->helperText(__('Kosongkan jika tidak ingin mengubah password saat edit.')),
                 // Tambahkan field lain di sini jika ada, contoh:
                 // Forms\Components\TextInput::make('nomor_lisensi')
                 //     ->label('Nomor Lisensi')
@@ -61,30 +78,30 @@ class AssessorResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('name')
-                    ->label('Nama Lengkap')
+                    ->label(__('Nama Lengkap'))
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('email')
-                    ->label('Alamat Email')
+                    ->label(__('Alamat Email'))
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('assignments_count')
                     ->counts('assignments') // Menghitung jumlah relasi 'assignments'
-                    ->label('Total Tugas')
+                    ->label(__('Total Tugas'))
                     ->sortable(),
 
                 Tables\Columns\TextColumn::make('assignments_max_updated_at')
                     ->max('assignments', 'updated_at') // Mengambil tanggal update terakhir dari relasi
-                    ->label('Aktivitas Terakhir')
+                    ->label(__('Aktivitas Terakhir'))
                     ->since() // Tampilkan dalam format "x hari yang lalu"
                     ->sortable(),
                 Tables\Columns\TextColumn::make('created_at')
-                    ->label('Tanggal Terdaftar')
+                    ->label(__('Tanggal Terdaftar'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('updated_at')
-                    ->label('Tanggal Diperbarui')
+                    ->label(__('Tanggal Diperbarui'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),

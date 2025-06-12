@@ -13,7 +13,12 @@ class LocationRankingWidget extends BaseWidget
 {
     protected static ?int $sort = 2;
     protected int | string | array $columnSpan = 'full';
-    protected static ?string $heading = 'Peringkat Lokasi';
+    // protected static ?string $heading = null;
+
+    public static function getHeading(): ?string
+    {
+        return __('Peringkat Lokasi');
+    }
 
     // Metode getHeaderActions() bisa kita hapus karena logikanya dipindah ke dalam table()
     // protected function getHeaderActions(): array { ... }
@@ -32,7 +37,7 @@ class LocationRankingWidget extends BaseWidget
             // --- 2. PINDAHKAN AKSI EKSPOR KE SINI ---
             ->headerActions([
                 ExportAction::make()
-                    ->label('Ekspor ke Excel')
+                    ->label(__('Ekspor ke Excel'))
                     ->exports([
                         ExcelExport::make()
                             ->fromTable()
@@ -42,18 +47,18 @@ class LocationRankingWidget extends BaseWidget
             ])
 
             ->columns([
-                Tables\Columns\TextColumn::make('name')->searchable()->sortable()->label('Nama Lokasi'),
-                Tables\Columns\TextColumn::make('province.country.name')->searchable()->sortable()->label('Negara'),
-                Tables\Columns\TextColumn::make('province.name')->searchable()->sortable()->label('Provinsi'),
-                
+                Tables\Columns\TextColumn::make('name')->searchable()->sortable()->label(__('Nama Lokasi')),
+                Tables\Columns\TextColumn::make('province.country.name')->searchable()->sortable()->label(__('Negara')),
+                Tables\Columns\TextColumn::make('province.name')->searchable()->sortable()->label(__('Provinsi')),
+
                 Tables\Columns\TextColumn::make('final_score')
-                    ->label('Skor Akhir')
+                    ->label(__('Skor Akhir'))
                     ->numeric(3)
                     ->sortable()
-                    ->placeholder('Belum Dinilai'), // Akan tampil untuk lokasi yang skornya null
+                    ->placeholder(__('Belum Dinilai')), // Akan tampil untuk lokasi yang skornya null
 
                 Tables\Columns\TextColumn::make('rank')
-                    ->label('Peringkat')
+                    ->label(__('Peringkat'))
                     ->badge()
                     ->color(fn ($state): string => match (strtoupper($state ?? '')) {
                         'DIAMOND' => 'info',
@@ -63,7 +68,7 @@ class LocationRankingWidget extends BaseWidget
                         default => 'danger',
                     })
                     ->sortable()
-                    ->placeholder('Belum Ada Peringkat'), // Akan tampil untuk lokasi yang peringkatnya null
+                    ->placeholder(__('Belum Ada Peringkat')), // Akan tampil untuk lokasi yang peringkatnya null
             ]);
     }
 }

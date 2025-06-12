@@ -29,13 +29,13 @@ class RevisionRequestNotification extends LaravelNotification
         $url = route('filament.assessor.resources.my-assignments.edit', ['record' => $this->assignment->id]);
 
         return FilamentNotification::make()
-            ->title('Permintaan Revisi Penilaian')
+            ->title(__('Permintaan Revisi Penilaian'))
             ->icon('heroicon-o-arrow-uturn-left')
             ->color('danger') // Warna merah untuk menandakan butuh perhatian
-            ->body("Admin meminta revisi untuk penilaian lokasi: {$this->assignment->location->name}.")
+            ->body(__("Admin meminta revisi untuk penilaian lokasi: {$this->assignment->location->name}."))
             ->actions([
                 Action::make('view_revision')
-                    ->label('Lihat & Kerjakan Revisi')
+                    ->label(__('Lihat & Kerjakan Revisi'))
                     ->url($url)
                     ->markAsRead(),
             ])

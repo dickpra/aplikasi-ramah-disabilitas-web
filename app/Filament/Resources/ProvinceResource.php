@@ -22,6 +22,24 @@ class ProvinceResource extends Resource
     protected static ?string $navigationGroup = 'Entitas';
     protected static ?int $navigationSort = 2;
 
+    public static function getNavigationGroup(): ?string
+    {
+        return __('Entitas');
+    }
+
+    public static function getNavigationLabel(): string
+    {
+        return __('Provinsi');
+    }
+    public static function getPluralModelLabel(): string
+    {
+        return __('Provinsi');
+    }
+    public static function getModelLabel(): string
+    {
+        return __('Provinsi');
+    }
+
     public static function form(Form $form): Form
     {
         return $form
@@ -31,20 +49,20 @@ class ProvinceResource extends Resource
                     ->searchable()
                     ->preload()
                     ->required()
-                    ->label('Negara')
+                    ->label(__('Negara'))
                     ->createOptionForm(fn(Form $form) => \App\Filament\Resources\CountryResource::form($form)) // Menggunakan form dari CountryResource
                     ->createOptionModalHeading('Buat Negara Baru'),
                 Forms\Components\TextInput::make('name')
                     ->required()
                     ->maxLength(255)
-                    ->label('Nama Provinsi')
+                    ->label(__('Nama Provinsi'))
                     ->rules([ // <-- Tambahkan aturan validasi
                     fn (Forms\Get $get): Unique => (new Unique('provinces', 'name'))
                         ->where('country_id', $get('country_id'))
                         ->ignore($form->getModelInstance()),
                 ])
                 ->validationMessages([
-                    'unique' => 'Nama provinsi ini sudah ada di negara yang dipilih.',
+                    'unique' => __('Nama provinsi ini sudah ada di negara yang dipilih.'),
                 ]),
             ]);
     }
@@ -53,8 +71,8 @@ class ProvinceResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('name')->searchable()->sortable()->label('Nama Provinsi'),
-                Tables\Columns\TextColumn::make('country.name')->searchable()->sortable()->label('Negara'),
+                Tables\Columns\TextColumn::make('name')->searchable()->sortable()->label(__('Nama Provinsi')),
+                Tables\Columns\TextColumn::make('country.name')->searchable()->sortable()->label(__('Negara')),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
@@ -63,7 +81,7 @@ class ProvinceResource extends Resource
             ->filters([
                 Tables\Filters\SelectFilter::make('country_id')
                     ->relationship('country', 'name')
-                    ->label('Filter berdasarkan Negara'),
+                    ->label(__('Filter berdasarkan Negara')),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),

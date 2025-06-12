@@ -29,30 +29,49 @@ class LocationResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-map-pin'; // Ganti ikon
     protected static ?string $navigationGroup = 'Entitas'; // Atau grup lain yang sesuai
     protected static ?int $navigationSort = 3; // Atur urutan jika perlu
+  
+    public static function getNavigationGroup(): ?string
+    {
+        return __('Entitas'); // Grup navigasi untuk Lokasi
+    }
+    
+    public static function getNavigationLabel(): string
+    {
+        return __('Lokasi');
+    }
+    public static function getPluralModelLabel(): string
+    {
+        return __('Lokasi');
+    }
+    public static function getModelLabel(): string
+    {
+        return __('Lokasi');
+    }
 
     public static function form(Form $form): Form
 {
     return $form
         ->schema([
             Forms\Components\TextInput::make('name')
-                ->required()->maxLength(255)->label('Nama Lokasi')
+                ->required()->maxLength(255)
+                ->label(__('Nama Lokasi'))
                 ->rules([
                     fn (Get $get): Unique => (new Unique('locations', 'name'))
                         ->where('province_id', $get('province_id'))
                         ->ignore($form->getModelInstance()),
                 ])
-                ->validationMessages(['unique' => 'Nama lokasi ini sudah ada di provinsi yang dipilih.']),
-            
+                ->validationMessages(['unique' => __('Nama lokasi ini sudah ada di provinsi yang dipilih.')]),
+
             Forms\Components\Select::make('location_type')
                 ->options([
                     'Kota' => 'Kota', 'Kabupaten' => 'Kabupaten', 'Perguruan Tinggi' => 'Perguruan Tinggi',
                     'Sekolah' => 'Sekolah', 'Ruang Publik' => 'Ruang Publik',
                 ])
-                ->required()->label('Jenis Lokasi'),
-            
+                ->required()->label(__('Jenis Lokasi')),
+
             // --- FIELD PEMILIHAN NEGARA (Sudah Benar) ---
             Forms\Components\Select::make('country_id')
-                    ->label('Negara')
+                    ->label(__('Negara'))
                     ->options(Country::query()->pluck('name', 'id'))
                     ->live()
                     ->afterStateUpdated(fn (Set $set) => $set('province_id', null))
@@ -62,11 +81,11 @@ class LocationResource extends Resource
                     ->createOptionForm([
                         Forms\Components\TextInput::make('name')
                             ->required()
-                            ->label('Nama Negara'),
+                            ->label(__('Nama Negara')),
                         Forms\Components\TextInput::make('code')
-                            ->label('Kode Negara'),
+                            ->label(__('Kode Negara')),
                     ])
-                    ->createOptionModalHeading('Buat Negara Baru')
+                    ->createOptionModalHeading(__('Buat Negara Baru'))
                     // --- TAMBAHKAN METODE INI ---
                     ->createOptionUsing(function (array $data): int {
                         // Logika untuk membuat record Country baru
@@ -77,7 +96,7 @@ class LocationResource extends Resource
             
             // --- FIELD PROVINSI YANG DIPERBAIKI ---
             Forms\Components\Select::make('province_id')
-                    ->label('Provinsi')
+                    ->label(__('Provinsi')) 
                     ->options(function (Get $get): Collection {
                         $countryId = $get('country_id');
                         if (!$countryId) {
@@ -93,14 +112,14 @@ class LocationResource extends Resource
                             // jadi kita tidak perlu menampilkannya di form modal.
                             Forms\Components\TextInput::make('name')
                                 ->required()
-                                ->label('Nama Provinsi Baru')
+                                ->label(__('Nama Provinsi Baru'))
                                 ->rules([
                                     fn (): Unique => (new Unique('provinces', 'name'))
                                         ->where('country_id', $get('country_id')),
                                 ]),
                         ]);
                     })
-                    ->createOptionModalHeading('Buat Provinsi Baru')
+                    ->createOptionModalHeading(__('Buat Provinsi Baru'))
                     // --- TAMBAHKAN METODE INI ---
                     ->createOptionUsing(function (array $data, Get $get): int {
                         // Ambil country_id dari form utama dan gabungkan dengan data dari form modal
@@ -166,24 +185,24 @@ class LocationResource extends Resource
             ->defaultSort('final_score', 'desc')
             // ->defaultSort('final_assessment.final_score') // Urutkan berdasarkan tanggal dibuat
             ->columns([
-                Tables\Columns\TextColumn::make('name')->searchable()->sortable()->label('Nama Lokasi'),
-                Tables\Columns\TextColumn::make('location_type')->searchable()->sortable()->label('Jenis Lokasi'),
-                Tables\Columns\TextColumn::make('province.name')->searchable()->sortable()->label('Provinsi'),
-                Tables\Columns\TextColumn::make('province.country.name')->searchable()->sortable()->label('Negara'),
+                Tables\Columns\TextColumn::make('name')->searchable()->sortable()->label(__('Nama Lokasi')),
+                Tables\Columns\TextColumn::make('location_type')->searchable()->sortable()->label(__('Jenis Lokasi')),
+                Tables\Columns\TextColumn::make('province.name')->searchable()->sortable()->label(__('Provinsi')),
+                Tables\Columns\TextColumn::make('province.country.name')->searchable()->sortable()->label(__('Negara')),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 // --- KOLOM BARU UNTUK SKOR AKHIR ---
                 Tables\Columns\TextColumn::make('final_assessment.final_score')
-                    ->label('Skor Akhir')
+                    ->label(__('Skor Akhir'))
                     ->numeric(3) // Tampilkan 3 angka di belakang koma
                     ->sortable(false) // Sorting pada kolom kalkulasi perlu query custom, nonaktifkan dulu
-                    ->placeholder('Belum Dinilai'),
+                    ->placeholder(__('Belum Dinilai')),
 
                 // --- KOLOM BARU UNTUK PERINGKAT ---
                 Tables\Columns\TextColumn::make('final_assessment.rank')
-                    ->label('Peringkat')
+                    ->label(__('Peringkat'))
                     ->badge()
                     ->color(fn ($state): string => match (strtoupper($state ?? '')) {
                         'DIAMOND' => 'info',
@@ -192,15 +211,15 @@ class LocationResource extends Resource
                         'BRONZE' => 'gray',
                         default => 'danger',
                     })
-                    ->placeholder('N/A'),
+                    ->placeholder(__('N/A')),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('province_id')
                     ->relationship('province', 'name')
-                    ->label('Filter berdasarkan Provinsi'),
+                    ->label(__('Filter berdasarkan Provinsi')),
                 Tables\Filters\SelectFilter::make('location_type') // Jika jenis lokasi beragam
                     ->options(fn () => Location::query()->select('location_type')->distinct()->pluck('location_type', 'location_type')->all())
-                    ->label('Filter berdasarkan Jenis Lokasi'),
+                    ->label(__('Filter berdasarkan Jenis Lokasi')),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),

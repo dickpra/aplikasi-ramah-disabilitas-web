@@ -19,20 +19,20 @@ class AssessorOverview extends BaseWidget
         }
 
         return [
-            Stat::make('Tugas Aktif', $this->record->assignments()
+            Stat::make(__('Tugas Aktif'), $this->record->assignments()
                 ->whereIn('status', ['assigned', 'in_progress', 'revision_needed'])
                 ->count())
-                ->description('Tugas yang sedang atau perlu dikerjakan')
+                ->description(__('Tugas yang sedang atau perlu dikerjakan'))
                 ->color('warning'),
 
-            Stat::make('Tugas Selesai (Disetujui)', $this->record->assignments()
+            Stat::make(__('Tugas Selesai (Disetujui)'), $this->record->assignments()
                 ->where('status', 'approved')
                 ->count())
-                ->description('Jumlah penilaian yang sudah final dan disetujui')
+                ->description(__('Jumlah penilaian yang sudah final dan disetujui'))
                 ->color('success'),
 
-            Stat::make('Total Semua Tugas', $this->record->assignments()->count())
-                ->description('Total tugas yang pernah diberikan kepada asesor ini')
+            Stat::make(__('Total Semua Tugas'), $this->record->assignments()->count())
+                ->description(__('Total tugas yang pernah diberikan kepada asesor ini'))
                 ->color('info'),
         ];
     }

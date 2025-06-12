@@ -33,13 +33,13 @@ class AssessorSubmissionNotification extends LaravelNotification
         $locationName = $this->assignment->location->name;
 
         return FilamentNotification::make()
-            ->title('Penilaian Baru Siap Direview')
+            ->title(__('Penilaian Baru Siap Direview'))
             ->icon('heroicon-o-inbox-arrow-down')
             ->color('info')
-            ->body("Asesor '{$assessorName}' telah mengirimkan hasil penilaian untuk lokasi '{$locationName}'.")
+            ->body(__("Asesor '{$assessorName}' telah mengirimkan hasil penilaian untuk lokasi '{$locationName}'."))
             ->actions([
                 Action::make('review')
-                    ->label('Review Sekarang')
+                    ->label(__('Review Sekarang'))
                     ->url($url)
                     ->markAsRead(),
             ])

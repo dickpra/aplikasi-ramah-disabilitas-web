@@ -19,9 +19,9 @@ class EditProfile extends Page implements HasForms
 
     protected static ?string $navigationIcon = 'heroicon-o-user';
     protected static string $view = 'filament.assessor.pages.edit-profile';
-    protected static ?string $navigationLabel = 'Profil Saya';
-    protected static ?string $title = 'Profil Saya';
-    protected static ?string $navigationGroup = 'Akun'; // Grup menu 'Akun'
+    protected static ?string $navigationLabel = null;
+    protected static ?string $title = null;
+    protected static ?string $navigationGroup = null; // Grup menu 'Akun'
 
     public ?array $data = [];
 
@@ -31,14 +31,29 @@ class EditProfile extends Page implements HasForms
         $this->form->fill(Auth::guard('assessor')->user()->attributesToArray());
     }
 
+    public static function getNavigationLabel(): string
+    {
+        return __('Profil Saya');
+    }
+
+    public function getTitle(): string
+    {
+        return __('Profil Saya');
+    }
+
+    public static function getNavigationGroup(): ?string
+    {
+        return __('Akun');
+    }
+
     public function form(Form $form): Form
     {
         return $form
             ->schema([
-                TextInput::make('name')->required()->label('Nama Lengkap'),
-                TextInput::make('email')->email()->required()->label('Alamat Email'),
-                TextInput::make('phone_number')->tel()->label('Nomor HP'),
-                TextInput::make('country')->label('Negara'),
+                TextInput::make('name')->required()->label(__('Nama Lengkap')),
+                TextInput::make('email')->email()->required()->label(__('Alamat Email')),
+                TextInput::make('phone_number')->tel()->label(__('Nomor HP')),
+                TextInput::make('country')->label(__('Negara')),
                 // Select::make('country')
                 //     ->label('Negara')
                 //     ->options([
@@ -50,13 +65,13 @@ class EditProfile extends Page implements HasForms
                 //     ->searchable(),
                 TextInput::make('password')
                     ->password()
-                    ->label('Password Baru')
+                    ->label(__('Password Baru'))
                     ->dehydrateStateUsing(fn ($state) => Hash::make($state))
                     ->dehydrated(fn ($state) => filled($state))
-                    ->helperText('Kosongkan jika tidak ingin mengubah password.'),
+                    ->helperText(__('Kosongkan jika tidak ingin mengubah password.')),
                 TextInput::make('password_confirmation')
                     ->password()
-                    ->label('Konfirmasi Password Baru')
+                    ->label(__('Konfirmasi Password Baru'))
                     ->requiredWith('password')
                     ->dehydrated(false),
             ])
@@ -80,12 +95,12 @@ class EditProfile extends Page implements HasForms
             
             Notification::make()
                 ->success()
-                ->title('Profil Disimpan')
-                ->body('Data pribadi Anda telah berhasil diperbarui.')
+                ->title(__('Profil Disimpan'))
+                ->body(__('Data pribadi Anda telah berhasil diperbarui.'))
                 ->send();
 
         } catch (\Exception $e) {
-            Notification::make()->danger()->title('Gagal Menyimpan')->body($e->getMessage())->send();
+            Notification::make()->danger()->title(__('Gagal Menyimpan'))->body($e->getMessage())->send();
         }
     }
 }

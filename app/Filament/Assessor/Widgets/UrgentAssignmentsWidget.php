@@ -13,7 +13,12 @@ class UrgentAssignmentsWidget extends BaseWidget
 {
     protected static ?int $sort = 2;
     protected int | string | array $columnSpan = 'full';
-    protected static ?string $heading = 'Tugas Baru (Berdasarkan Batas Waktu)';
+    protected static ?string $heading = null;
+
+    public static function getHeading(): ?string
+    {
+        return __('Tugas Baru (Berdasarkan Batas Waktu)');
+    }
 
     public function table(Table $table): Table
     {
@@ -26,8 +31,8 @@ class UrgentAssignmentsWidget extends BaseWidget
             ->defaultSort('due_date', 'asc')
             ->paginated(false)
             ->columns([
-                Tables\Columns\TextColumn::make('location.name')->label('Lokasi'),
-                Tables\Columns\TextColumn::make('due_date')->date('d M Y')->label('Batas Waktu'),
+                Tables\Columns\TextColumn::make('location.name')->label(__('Lokasi')),
+                Tables\Columns\TextColumn::make('due_date')->date('d M Y')->label(__('Batas Waktu')),
                 Tables\Columns\TextColumn::make('status')->badge()
                     ->color(fn (string $state): string => match ($state) {
                         'assigned' => 'primary', 'revision_needed' => 'danger', default => 'warning',
@@ -35,7 +40,7 @@ class UrgentAssignmentsWidget extends BaseWidget
             ])
             ->actions([
                 Tables\Actions\Action::make('kerjakan')
-                    ->label('Kerjakan')
+                    ->label(__('Kerjakan'))
                     ->url(fn (Assignment $record): string => MyAssignmentResource::getUrl('edit', ['record' => $record]))
                     ->icon('heroicon-o-arrow-right'),
             ]);

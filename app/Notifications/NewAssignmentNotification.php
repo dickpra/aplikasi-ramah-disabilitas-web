@@ -29,13 +29,13 @@ class NewAssignmentNotification extends LaravelNotification
         $url = route('filament.assessor.resources.my-assignments.edit', ['record' => $this->assignment->id]);
 
         return FilamentNotification::make()
-            ->title('Tugas Penilaian Baru Diterima')
+            ->title(__('Tugas Penilaian Baru Diterima'))
             ->icon('heroicon-o-clipboard-document-list')
-            ->body("Anda telah ditugaskan untuk menilai lokasi: {$this->assignment->location->name}.")
+            ->body(__("Anda telah ditugaskan untuk menilai lokasi: {$this->assignment->location->name}."))
             ->actions([
                 // Gunakan Action yang sudah di-import dengan benar
                 Action::make('view')
-                    ->label('Lihat Tugas')
+                    ->label(__('Lihat Tugas'))
                     ->url($url)
                     // ->markAsRead(),
             ])

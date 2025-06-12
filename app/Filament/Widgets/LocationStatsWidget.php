@@ -37,23 +37,23 @@ class LocationStatsWidget extends BaseWidget
             //     ->description('Jumlah total lokasi yang terdaftar')
             //     ->descriptionIcon('heroicon-m-map-pin')
             //     ->color('primary'),
-            Stat::make('Total Lokasi Dinilai', $totalAssessed)
-                ->description('Jumlah lokasi dengan penilaian yang sudah disetujui')
+            Stat::make(__('Total Lokasi Dinilai'), $totalAssessed)
+                ->description(__('Jumlah lokasi dengan penilaian yang sudah disetujui'))
                 ->descriptionIcon('heroicon-m-building-office-2')
                 ->color('success'),
-            Stat::make('Skor Rata-rata Nasional', $averageScore)
-                ->description('Rata-rata dari semua skor akhir lokasi')
+            Stat::make(__('Skor Rata-rata Nasional'), $averageScore)
+                ->description(__('Rata-rata dari semua skor akhir lokasi'))
                 ->descriptionIcon('heroicon-m-calculator')
                 ->color('info'),
 
             // --- KARTU STATISTIK YANG DIGANTI ---
-            Stat::make('Penilaian Belum Selesai', $unfinishedAssignments)
-                ->description('Jumlah tugas yang masih aktif atau sedang dikerjakan')
+            Stat::make(__('Penilaian Belum Selesai'), $unfinishedAssignments)
+                ->description(__('Jumlah tugas yang masih aktif atau sedang dikerjakan'))
                 ->descriptionIcon('heroicon-m-clock')
                 ->color('danger'),
 
-            Stat::make('Jumlah Asesor', $assessorsCount)
-                ->description('Total asesor yang terdaftar')
+            Stat::make(__('Jumlah Asesor'), $assessorsCount)
+                ->description(__('Total asesor yang terdaftar'))
                 ->descriptionIcon('heroicon-m-user-group')
                 ->color('warning'),
         ];

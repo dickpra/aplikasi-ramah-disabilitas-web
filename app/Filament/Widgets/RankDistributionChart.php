@@ -8,7 +8,14 @@ use Illuminate\Support\Arr;
 
 class RankDistributionChart extends ChartWidget
 {
-    protected static ?string $heading = 'Distribusi Peringkat Lokasi';
+    // protected static ?string $heading = null;
+
+    public function getHeading(): string
+    {
+        return __('Distribusi Peringkat Lokasi');
+    }
+
+
     protected static ?int $sort = 3;
 
     protected function getData(): array
@@ -34,7 +41,7 @@ class RankDistributionChart extends ChartWidget
         return [
             'datasets' => [
                 [
-                    'label' => 'Jumlah Lokasi',
+                    'label' => __('Jumlah Lokasi'),
                     'data' => $data,
                     'backgroundColor' => [ // Warna untuk setiap bar
                         'rgba(54, 162, 235, 0.5)', // DIAMOND (biru)

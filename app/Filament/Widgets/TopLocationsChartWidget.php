@@ -8,8 +8,13 @@ use Illuminate\Support\Facades\Log; // Import Log untuk debugging
 
 class TopLocationsChartWidget extends ChartWidget
 {
-    protected static ?string $heading = '5 Lokasi dengan Skor Tertinggi';
+    // protected static ?string $heading = '';
     protected static ?int $sort = 3; // Sesuaikan urutan jika perlu
+
+    public function getHeading(): ?string
+    {
+        return __('5 Lokasi dengan Skor Tertinggi');
+    }
 
     protected function getData(): array
     {
@@ -26,7 +31,7 @@ class TopLocationsChartWidget extends ChartWidget
         if ($assessedLocations->isEmpty()) {
             Log::warning('[ChartWidget] Tidak ada lokasi yang dinilai dan disetujui. Grafik akan kosong.');
             return [
-                'datasets' => [['label' => 'Skor Akhir', 'data' => []]],
+                'datasets' => [['label' => __('Skor Akhir'), 'data' => []]],
                 'labels' => [],
             ];
         }
@@ -55,7 +60,7 @@ class TopLocationsChartWidget extends ChartWidget
         return [
             'datasets' => [
                 [
-                    'label' => 'Skor Akhir',
+                    'label' => __('Skor Akhir'),
                     'data' => $data,
                     'backgroundColor' => 'rgba(75, 192, 192, 0.5)',
                     'borderColor' => 'rgb(75, 192, 192)',

@@ -35,8 +35,18 @@ class MyAssignmentResource extends Resource
     protected static ?string $model = Assignment::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-clipboard-document-list';
-    protected static ?string $modelLabel = 'Tugas Penilaian Saya';
-    protected static ?string $pluralModelLabel = 'Tugas Penilaian Saya';
+    protected static ?string $modelLabel = null;
+    protected static ?string $pluralModelLabel = null;
+
+    public static function getModelLabel(): string
+    {
+        return __('Tugas Penilaian Saya');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('Tugas Penilaian Saya');
+    }
 
     public const ACTIVE_STATUSES = ['assigned', 'in_progress', 'revision_needed'];
 
@@ -61,33 +71,33 @@ class MyAssignmentResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\Section::make('Detail Tugas')
+                Forms\Components\Section::make(__('Detail Tugas'))
                     ->columns(2)
                     ->disabled(fn(string $operation) => $operation === 'view')
                     ->schema([
                         Placeholder::make('location_name')
-                            ->label('Lokasi yang Dinilai')
+                            ->label(__('Lokasi yang Dinilai'))
                             ->content(fn (Assignment $record): string => $record?->location->name ?? '-'),
                         Placeholder::make('location_type')
-                            ->label('Tipe Lokasi')
+                            ->label(__('Tipe Lokasi'))
                             ->content(fn (Assignment $record): string => $record?->location->location_type ?? '-'),
                         Placeholder::make('assignment_date_display')
-                            ->label('Tanggal Penugasan')
+                            ->label(__('Tanggal Penugasan'))
                             ->content(fn (?Assignment $record): string => $record?->assignment_date?->translatedFormat('d M Y') ?? '-'),
                         Placeholder::make('due_date_display')
-                            ->label('Batas Waktu Penilaian')
+                            ->label(__('Batas Waktu Penilaian'))
                             ->content(fn (?Assignment $record): string => $record?->due_date?->translatedFormat('d M Y') ?? '-'),
                         FormSelect::make('status')
-                            ->label('Ubah Status Tugas Menjadi:')
-                            ->options(['in_progress' => 'Sedang Dikerjakan'])
+                            ->label(__('Ubah Status Tugas Menjadi:'))
+                            ->options(['in_progress' => __('Sedang Dikerjakan')])
                             ->visible(fn (string $operation, ?Assignment $record): bool => $operation === 'edit' && $record?->status === 'assigned')
-                            ->helperText('Pilih "Sedang Dikerjakan" jika Anda memulai penilaian ini.'),
+                            ->helperText(__('Pilih "Sedang Dikerjakan" jika Anda memulai penilaian ini.')),
                         // Placeholder::make('current_status_display')
                         //     ->label('Status Tugas Saat Ini')
                         //     ->content(fn (?Assignment $record): string => ucfirst(str_replace('_', ' ', $record?->status ?? 'assigned')))
                         //     ->visible(fn (string $operation, ?Assignment $record): bool => $operation === 'edit' && $record?->status !== 'assigned'),
                         Forms\Components\Placeholder::make('current_status_display')
-                            ->label('Status Tugas Saat Ini')
+                            ->label(__('Status Tugas Saat Ini'))
                             ->content(function (?Assignment $record): ?HtmlString {
                                 if (!$record || !$record->status) {
                                     return null;
@@ -117,14 +127,14 @@ class MyAssignmentResource extends Resource
                             })
                             ->visible(fn (string $operation, ?Assignment $record): bool => $operation === 'edit' && $record?->status !== 'assigned'),
                         Textarea::make('notes')
-                            ->label('Catatan Umum Penugasan (dari Admin)')
+                            ->label(__('Catatan Umum Penugasan (dari Admin)'))
                             ->disabled()
                             ->columnSpanFull()
                             ->visible(fn(string $operation, $state) => !empty($state)),
                     ]),
 
-                Forms\Components\Section::make('Penilaian Indikator')
-                    ->description('Isi skor, catatan, dan unggah bukti untuk setiap indikator yang relevan.')
+                Forms\Components\Section::make(__('Penilaian Indikator'))
+                    ->description(__('Isi skor, catatan, dan unggah bukti untuk setiap indikator yang relevan.'))
                     ->visible(fn (string $operation): bool => $operation === 'edit')
                     ->schema([
                         Repeater::make('indicator_scores_repeater') // Nama yang akan digunakan di mutateFormDataBeforeFill dan handleRecordUpdate
@@ -141,7 +151,7 @@ class MyAssignmentResource extends Resource
                                 $indicatorId = $state['indicator_id'] ?? null;
                                 if ($indicatorId) {
                                     $indicator = Indicator::find($indicatorId);
-                                    return $indicator?->name ?? 'Indikator Tidak Ditemukan';
+                                    return $indicator?->name ?? (__('Indikator Tidak Ditemukan'));
                                 }
                                 return 'Indikator Baru';
                             })
@@ -156,29 +166,31 @@ class MyAssignmentResource extends Resource
                                         $indicatorId = $get('indicator_id');
                                         if (!$indicatorId) return null;
                                         $indicator = Indicator::find($indicatorId);
-                                        if (!$indicator) return new HtmlString('<div>Indikator tidak valid atau tidak ditemukan.</div>');
+                                        if (!$indicator) return new HtmlString('<div>(' . __('Indikator tidak valid atau tidak ditemukan.') . ')</div>');
 
                                         $htmlOutput = "<div class='mb-2'><strong>Indikator:</strong> " . e($indicator->name) . "</div>";
-                                        if ($indicator->category) $htmlOutput .= "<div><strong>Kategori:</strong> " . e($indicator->category) . "</div>";
-                                        if ($indicator->keywords) $htmlOutput .= "<div><strong>Kata Kunci:</strong> " . e($indicator->keywords) . "</div>";
-                                        if ($indicator->measurement_method) $htmlOutput .= "<div><strong>Cara Pengukuran:</strong> " . e($indicator->measurement_method) . "</div>";
+                                        if ($indicator->category) $htmlOutput .= "<div><strong> " . __('Kategori:') . "</strong> " . e($indicator->category) . "</div>";
+                                        if ($indicator->keywords) $htmlOutput .= "<div><strong> " . __('Kata Kunci:') . "</strong> " . e($indicator->keywords) . "</div>";
+                                        if ($indicator->measurement_method) $htmlOutput .= "<div><strong> " . __('Cara Pengukuran:') . "</strong> " . e($indicator->measurement_method) . "</div>";
+                                        if ($indicator->keywords) $htmlOutput .= "<div><strong> " . __('Kata Kunci:') . "</strong> " . e($indicator->keywords) . "</div>";
+                                        if ($indicator->measurement_method) $htmlOutput .= "<div><strong> " . __('Cara Pengukuran:') . "</strong> " . e($indicator->measurement_method) . "</div>";
                                         if ($indicator->scoring_criteria_text) {
-                                            $htmlOutput .= "<div class='mt-2 p-2 border rounded bg-gray-50 dark:bg-gray-800 dark:border-gray-700'><strong>Kriteria Penilaian:</strong><br>" . nl2br(e($indicator->scoring_criteria_text)) . "</div>";
+                                            $htmlOutput .= "<div class='mt-2 p-2 border rounded bg-gray-50 dark:bg-gray-800 dark:border-gray-700'><strong> " . __('Kriteria Penilaian:') . "</strong><br>" . nl2br(e($indicator->scoring_criteria_text)) . "</div>";
                                         }
                                         return new HtmlString($htmlOutput);
                                     }),
 
                                     Radio::make('score')
-                                    ->label('Pilih Skor:')
+                                    ->label(__('Pilih Skor:'))
                                     ->options(function (Get $get): array {
                                         $indicatorId = $get('indicator_id');
                                         if (!$indicatorId) {
-                                            return ['0' => 'N/A (Indikator tidak valid)']; // Fallback
+                                            return ['0' => __('N/A (Indikator tidak valid)')]; // Fallback
                                         }
                                         
                                         $indicator = Indicator::find($indicatorId);
                                         if (!$indicator) {
-                                            return ['0' => 'N/A (Indikator tidak ditemukan)']; // Fallback
+                                            return ['0' => __('N/A (Indikator tidak ditemukan)')]; // Fallback
                                         }
 
                                         $options = [];
@@ -231,11 +243,11 @@ class MyAssignmentResource extends Resource
                                     // ->required() // Dihapus agar bisa simpan progres
                                 ,
                                 Textarea::make('assessor_notes')
-                                    ->label('Catatan Asesor untuk Indikator Ini')
+                                    ->label(__('Catatan Asesor untuk Indikator Ini'))
                                     ->rows(3)->columnSpanFull(),
 
                                 FileUpload::make('evidences_upload') // Nama field konsisten
-                                    ->label('Unggah atau Kelola Bukti Pendukung')
+                                    ->label(__('Unggah atau Kelola Bukti Pendukung'))
                                     ->multiple()->disk('public')
                                     ->visibility('public')
                                     // ->maxSize(10000) // 1GB
@@ -267,7 +279,7 @@ class MyAssignmentResource extends Resource
                                         }
                                         return $path; 
                                     })
-                                    ->helperText('File lama akan tampil. Unggah file baru atau hapus dari daftar.')
+                                    ->helperText(__('File lama akan tampil. Unggah file baru atau hapus dari daftar.'))
                                     ->columnSpanFull(),
                                 
                                 // Placeholder untuk menampilkan bukti yang sudah ada dan opsi menghapusnya
@@ -286,10 +298,10 @@ class MyAssignmentResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('location.name')->label('Lokasi')->searchable()->sortable(),
-                Tables\Columns\TextColumn::make('assignment_date')->label('Tgl Penugasan')->date('d M Y')->sortable(),
-                Tables\Columns\TextColumn::make('due_date')->label('Batas Waktu')->date('d M Y')->sortable(),
-                Tables\Columns\TextColumn::make('status')->label('Status')->badge()
+                Tables\Columns\TextColumn::make('location.name')->label(__('Lokasi'))->searchable()->sortable(),
+                Tables\Columns\TextColumn::make('assignment_date')->label(__('Tgl Penugasan'))->date('d M Y')->sortable(),
+                Tables\Columns\TextColumn::make('due_date')->label(__('Batas Waktu'))->date('d M Y')->sortable(),
+                Tables\Columns\TextColumn::make('status')->label(__('Status'))->badge()
                     ->color(fn (string $state): string => match ($state) {
                         // 'assigned' => 'primary',
                         // 'in_progress' => 'warning',
@@ -308,18 +320,21 @@ class MyAssignmentResource extends Resource
             ->filters([
                 Tables\Filters\SelectFilter::make('status')
                     ->options([
-                        'assigned' => 'Ditugaskan',
-                        'in_progress' => 'Sedang Berjalan',
-                        'completed' => 'Selesai',
-                        'cancelled' => 'Dibatalkan',
-                    ])->label('Status'),
+                        'assigned' => __('Ditugaskan'),
+                        'in_progress' => __('Sedang Berjalan'),
+                        'completed' => __('Selesai'),
+                        'cancelled' => __('Dibatalkan'),
+                    ])->label(__('Status')),
             ])
             ->actions([
                 Tables\Actions\Action::make('assess')
-                    ->label('Mulai/Lanjutkan Penilaian')->icon('heroicon-o-pencil-square')
+                    ->label(__('Mulai/Lanjutkan Penilaian'))->icon('heroicon-o-pencil-square')
                     ->url(fn (Assignment $record): string => static::getUrl('edit', ['record' => $record]))
                     ->visible(fn (Assignment $record): bool => in_array($record->status, self::ACTIVE_STATUSES)),
-                Tables\Actions\ViewAction::make()->label('Lihat Detail Tugas'),
+                Tables\Actions\ViewAction::make()->label(__('Lihat Detail Tugas'))
+                    ->icon('heroicon-o-eye')
+                    ->url(fn (Assignment $record): string => static::getUrl('edit', ['record' => $record, 'view' => true]))
+                    ->visible(fn (Assignment $record): bool => !in_array($record->status, self::ACTIVE_STATUSES)),
             ])
             ->bulkActions([])
             ->defaultSort('created_at', 'desc')

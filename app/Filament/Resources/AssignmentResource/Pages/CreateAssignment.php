@@ -30,8 +30,8 @@ class CreateAssignment extends CreateRecord
         if (($currentlyAssignedCount + count($selectedAssessorIds)) > 3 && count(array_unique($selectedAssessorIds)) > (3-$currentlyAssignedCount) ) {
              Notification::make()
                 ->danger()
-                ->title('Gagal Membuat Penugasan')
-                ->body('Jumlah total asesor yang dipilih akan melebihi batas maksimal 3 untuk lokasi ini.')
+                ->title(__('Gagal Membuat Penugasan'))
+                ->body(__('Jumlah total asesor yang dipilih akan melebihi batas maksimal 3 untuk lokasi ini.'))
                 ->send();
             // Melemparkan exception akan menghentikan proses dan menampilkan error form standar jika validasi form tidak menangkapnya
             // throw ValidationException::withMessages(['assessor_ids' => 'Jumlah total asesor akan melebihi batas 3.']);
@@ -71,8 +71,8 @@ class CreateAssignment extends CreateRecord
                     // Batas sudah tercapai saat iterasi, hentikan
                     Notification::make()
                         ->warning()
-                        ->title('Batas Asesor Tercapai')
-                        ->body("Beberapa asesor mungkin tidak dapat ditugaskan karena lokasi sudah mencapai batas maksimal 3 asesor.")
+                        ->title(__('Batas Asesor Tercapai'))
+                        ->body(__("Beberapa asesor mungkin tidak dapat ditugaskan karena lokasi sudah mencapai batas maksimal 3 asesor."))
                         ->send();
                     break;
                 }
@@ -82,8 +82,8 @@ class CreateAssignment extends CreateRecord
             DB::rollBack();
             Notification::make()
                 ->danger()
-                ->title('Error Penyimpanan')
-                ->body('Terjadi kesalahan saat menyimpan data penugasan: ' . $e->getMessage())
+                ->title(__('Error Penyimpanan'))
+                ->body(__('Terjadi kesalahan saat menyimpan data penugasan: ' . $e->getMessage()))
                 ->send();
             // Mengembalikan model kosong jika terjadi error
             return new Assignment();
@@ -92,14 +92,14 @@ class CreateAssignment extends CreateRecord
         if ($assignmentsSuccessfullyCreated > 0) {
              Notification::make()
                 ->success()
-                ->title('Penugasan Berhasil')
-                ->body("{$assignmentsSuccessfullyCreated} asesor berhasil ditugaskan.")
+                ->title(__('Penugasan Berhasil'))
+                ->body(__("{$assignmentsSuccessfullyCreated} asesor berhasil ditugaskan."))
                 ->send();
         } elseif ($assignmentsAttempted > 0) {
              Notification::make()
                 ->info()
-                ->title('Info Penugasan')
-                ->body("Tidak ada asesor baru yang ditugaskan. Mungkin semua yang dipilih sudah ada atau batas lokasi tercapai.")
+                ->title(__('Info Penugasan'))
+                ->body(__('Tidak ada asesor baru yang ditugaskan. Mungkin semua yang dipilih sudah ada atau batas lokasi tercapai.'))
                 ->send();
         }
 

@@ -28,6 +28,7 @@ class AssessorPanelProvider extends PanelProvider
     public function panel(Panel $panel): Panel
     {
         return $panel
+            ->favicon(asset('img/favicon.png'))
             ->brandName('Assessor Panel')
             ->id('assessor')
             ->path('assessor')
@@ -62,6 +63,7 @@ class AssessorPanelProvider extends PanelProvider
                 SubstituteBindings::class,
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
+                \App\Http\Middleware\SetLocale::class,
             ])
             ->authGuard('assessor')
             ->authMiddleware([

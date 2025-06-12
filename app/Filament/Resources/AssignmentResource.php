@@ -39,9 +39,26 @@ class AssignmentResource extends Resource
 {
     protected static ?string $model = Assignment::class;
     protected static ?string $navigationIcon = 'heroicon-o-document-check';
-    protected static ?string $navigationGroup = 'Operasional';
+    // protected static ?string $navigationGroup = 'Operasional';
     protected static ?string $modelLabel = 'Penugasan Asesor';
-    protected static ?string $pluralModelLabel = 'Data Penugasan';
+    // protected static ?string $pluralModelLabel = 'Data Penugasan';
+    protected static ?int $navigationSort = 2; // Urutan di grup navigasi
+    public static function getNavigationGroup(): ?string
+    {
+        return __('Operasional'); // Grup navigasi untuk Asesor
+    }
+    public static function getNavigationLabel(): string
+    {
+        return __('Data Penugasan');
+    }
+    public static function getPluralModelLabel(): string
+    {
+        return __('Data Penugasan');
+    }
+    public static function getModelLabel(): string
+    {
+        return __('Penugasan');
+    }
 
     public static function form(Form $form): Form
     {
@@ -52,7 +69,7 @@ class AssignmentResource extends Resource
                 ->searchable()
                 ->preload()
                 ->required()
-                ->label('Lokasi')
+                ->label(__('Lokasi'))
                 // Menjadi non-aktif saat operasi adalah 'edit'
                 ->disabled(fn (string $operation): bool => $operation === 'edit'), // <-- TAMBAHKAN ATAU PASTIKAN BARIS INI ADA
 
@@ -70,7 +87,7 @@ class AssignmentResource extends Resource
                             ->pluck('name', 'id')
                             ->all();
                     },)
-                    ->preload()->required()->label('Pilih Asesor (Max 3)')
+                    ->preload()->required()->label(__('Pilih Asesor (Max 3)'))
                     ->rules([
                         'array',
                         // Validasi Max 3 per lokasi (seperti sebelumnya)
@@ -78,17 +95,20 @@ class AssignmentResource extends Resource
                             return function (string $attribute, array $value, Closure $fail) use ($get, $operation) {
                                 if ($operation !== 'create') return;
                                 $locationId = $get('location_id');
-                                if (!$locationId) { $fail("Pilih lokasi terlebih dahulu."); return; }
+                                if (!$locationId) { $fail(__('Pilih lokasi terlebih dahulu.')); return; }
                                 $selectedAssessorIds = $value;
                                 $location = Location::find($locationId);
-                                if (!$location) { $fail("Lokasi tidak valid."); return; }
+                                if (!$location) { $fail(__('Lokasi tidak valid.')); return; }
                                 $currentlyAssignedCount = $location->assignments()->count();
                                 $newlySelectedCount = count($selectedAssessorIds);
                                 if (($currentlyAssignedCount + $newlySelectedCount) > 3) {
-                                    $fail("Total asesor untuk lokasi ini akan menjadi " . ($currentlyAssignedCount + $newlySelectedCount) . ", melebihi batas 3. Saat ini sudah ada {$currentlyAssignedCount} asesor.");
+                                    $fail(__('Total asesor untuk lokasi ini akan menjadi :count, melebihi batas 3. Saat ini sudah ada :current asesor.', [
+                                        'count' => ($currentlyAssignedCount + $newlySelectedCount),
+                                        'current' => $currentlyAssignedCount,
+                                    ]));
                                 }
                                 if (count(array_unique($selectedAssessorIds)) !== $newlySelectedCount) {
-                                    $fail("Ada asesor yang sama dipilih lebih dari sekali.");
+                                    $fail(__('Ada asesor yang sama dipilih lebih dari sekali.'));
                                 }
                             };
                         },
@@ -103,7 +123,9 @@ class AssignmentResource extends Resource
                                         ->exists();
                                     if ($hasActiveAssignment) {
                                         $assessor = Assessor::find($assessorId);
-                                        $fail("Asesor '{$assessor->name}' sudah memiliki tugas aktif lain. Setiap asesor hanya boleh memiliki satu tugas aktif.");
+                                        $fail(__('Asesor \':name\' sudah memiliki tugas aktif lain. Setiap asesor hanya boleh memiliki satu tugas aktif.', [
+                                            'name' => $assessor->name,
+                                        ]));
                                         // Anda bisa memutuskan untuk menghentikan validasi setelah menemukan satu error
                                         // atau mengumpulkan semua error. Untuk kesederhanaan, kita hentikan.
                                         return;
@@ -112,7 +134,7 @@ class AssignmentResource extends Resource
                             };
                         }
                     ])
-                    ->helperText('Maks. total 3 asesor per lokasi. Setiap asesor hanya boleh 1 tugas aktif.')
+                    ->helperText(__('Maks. total 3 asesor per lokasi. Setiap asesor hanya boleh 1 tugas aktif.'))
                     ->visible(fn (string $operation): bool => $operation === 'create'),
 
                 // Field untuk EDIT - Single-select Asesor
@@ -122,7 +144,7 @@ class AssignmentResource extends Resource
                     ->preload()
                     ->required()
                     ->disabled()
-                    ->label('Asesor')
+                    ->label(__('Asesor'))
                     ->reactive() // Penting agar status bisa divalidasi ulang jika asesor berubah
                     ->rules([
                         // Validasi unique (seperti sebelumnya)
@@ -142,7 +164,7 @@ class AssignmentResource extends Resource
                                 $otherAssignmentsCount = Assignment::where('location_id', $locationId)
                                     ->where('id', '!=', $record->id)->count();
                                 if ($otherAssignmentsCount >= 3) {
-                                    $fail("Lokasi ini sudah memiliki 3 asesor lain.");
+                                    $fail(__('Lokasi ini sudah memiliki 3 asesor lain.'));
                                 }
                             };
                         },
@@ -164,30 +186,32 @@ class AssignmentResource extends Resource
                                 // Jika asesor ini sudah punya tugas aktif lain, DAN tugas yang sedang diedit ini statusnya juga akan aktif
                                 if ($otherActiveAssignmentsCount > 0 && in_array($targetStatus, ['assigned', 'in_progress'])) {
                                     $assessor = Assessor::find($targetAssessorId);
-                                    $fail("Asesor '{$assessor->name}' sudah memiliki tugas aktif lain. Tidak dapat menetapkan tugas ini sebagai aktif juga.");
+                                    $fail(__('Asesor \':name\' sudah memiliki tugas aktif lain. Tidak dapat menetapkan tugas ini sebagai aktif juga.', [
+                                        'name' => $assessor->name,
+                                    ]));
                                 }
                             };
                         }
                     ])
                     ->visible(fn (string $operation): bool => $operation === 'edit'),
 
-                Forms\Components\DatePicker::make('assignment_date')->label('Tanggal Penugasan')->default(now()),
-                Forms\Components\DatePicker::make('due_date')->label('Batas Waktu'),
+                Forms\Components\DatePicker::make('assignment_date')->label(__('Tanggal Penugasan'))->default(now()),
+                Forms\Components\DatePicker::make('due_date')->label(__('Batas Waktu')),
                 Forms\Components\Select::make('status')
                     ->options([
-                        'assigned' => 'Ditugaskan',
-                        'in_progress' => 'Sedang Berjalan',
-                        'completed' => 'Selesai (dari Asesor)',
-                        'pending_review_admin' => 'Menunggu Review Admin', // Jika ada alur review
-                        'approved' => 'Disetujui Admin', // Status final
-                        'revision_needed' => 'Butuh Revisi',
-                        'cancelled' => 'Dibatalkan',
+                        'assigned' => __('Ditugaskan'),
+                        'in_progress' => __('Sedang Berjalan'),
+                        'completed' => __('Selesai (dari Asesor)'),
+                        'pending_review_admin' => __('Menunggu Review Admin'), // Jika ada alur review
+                        'approved' => __('Disetujui Admin'), // Status final
+                        'revision_needed' => __('Butuh Revisi'),
+                        'cancelled' => __('Dibatalkan'),
                     ])
                     ->default('assigned')
                     ->required()
-                    ->label('Status Penugasan')
+                    ->label(__('Status Penugasan'))
                     ->reactive(), // Tambahkan reactive agar validasi asesor bisa memicu ulang
-                Forms\Components\Textarea::make('notes')->label('Catatan Tambahan')->columnSpanFull(),
+                Forms\Components\Textarea::make('notes')->label(__('Catatan Tambahan'))->columnSpanFull(),
 
 
                 // // FORM CADANGAN
@@ -316,10 +340,10 @@ class AssignmentResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('location.name')->searchable()->sortable()->label('Lokasi'),
-                Tables\Columns\TextColumn::make('assessor.name')->searchable()->sortable()->label('Asesor'), // Diubah dari user.name
-                Tables\Columns\TextColumn::make('assignment_date')->date()->sortable()->label('Tgl Penugasan'),
-                Tables\Columns\TextColumn::make('due_date')->date()->sortable()->label('Batas Waktu')->placeholder('Tidak Ada Batasan'),
+                Tables\Columns\TextColumn::make('location.name')->searchable()->sortable()->label(__('Lokasi')),
+                Tables\Columns\TextColumn::make('assessor.name')->searchable()->sortable()->label(__('Asesor')), // Diubah dari user.name
+                Tables\Columns\TextColumn::make('assignment_date')->date()->sortable()->label(__('Tgl Penugasan')),
+                Tables\Columns\TextColumn::make('due_date')->date()->sortable()->label(__('Batas Waktu'))->placeholder(__('Tidak Ada Batasan')),
                 Tables\Columns\TextColumn::make('status')->badge()->searchable()->sortable()
                     ->color(fn (string $state): string => match ($state) {
                         'assigned' => 'primary',
@@ -330,30 +354,30 @@ class AssignmentResource extends Resource
                         'revision_needed' => 'danger',
                         'cancelled' => 'gray',
                         default => 'gray',
-                    })->label('Status'),
+                    })->label(__('Status')),
                     Tables\Columns\TextColumn::make('final_score')
-                ->label('Hasil Skor')
+                ->label(__('Hasil Skor'))
                 ->numeric(3)
-                ->placeholder('Belum ada skor')
+                ->placeholder(__('Belum ada skor'))
                 ->sortable(false), // Sorting pada accessor perlu query custom, nonaktifkan dulu
 
                 Tables\Columns\TextColumn::make('created_at') // Kolom untuk sorting
                     ->dateTime()
                     ->sortable()
-                    ->label('Dibuat Pada')
-                    // ->toggleable(isToggledHiddenByDefault: true), 
+                    ->label(__('Dibuat Pada'))
+                    // ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->defaultSort('created_at', 'desc')
             ->filters([
-                Tables\Filters\SelectFilter::make('location_id')->relationship('location', 'name')->label('Filter Lokasi'),
-                Tables\Filters\SelectFilter::make('assessor_id')->relationship('assessor', 'name')->label('Filter Asesor'), // Diubah
+                Tables\Filters\SelectFilter::make('location_id')->relationship('location', 'name')->label(__('Filter Lokasi')),
+                Tables\Filters\SelectFilter::make('assessor_id')->relationship('assessor', 'name')->label(__('Filter Asesor')), // Diubah
                 Tables\Filters\SelectFilter::make('status')
                     ->options([
-                        'assigned' => 'Ditugaskan',
-                        'in_progress' => 'Sedang Berjalan',
-                        'completed' => 'Selesai',
-                        'cancelled' => 'Dibatalkan',
-                    ])->label('Filter Status'),
+                        'assigned' => __('Ditugaskan'),
+                        'in_progress' => __('Sedang Berjalan'),
+                        'completed' => __('Selesai'),
+                        'cancelled' => __('Dibatalkan'),
+                    ])->label(__('Filter Status')),
             ])
             // ->actions([
             //     Tables\Actions\EditAction::make(),
@@ -378,7 +402,7 @@ class AssignmentResource extends Resource
             ->actions([
                 // --- INI ADALAH AKSI BARU UNTUK MENGAKSES HALAMAN REVIEW ---
                 Action::make('review')
-                    ->label('Review & Aksi')
+                    ->label(__('Review & Aksi'))
                     ->icon('heroicon-o-eye')
                     ->color('primary') // Warna tombol
                     // Mengarahkan ke rute 'review' yang kita daftarkan di getPages()

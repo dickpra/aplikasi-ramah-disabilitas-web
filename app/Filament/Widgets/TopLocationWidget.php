@@ -25,7 +25,7 @@ class TopLocationWidget extends BaseWidget
         if ($topLocation && isset($topLocation->final_assessment)) {
             $scoreData = $topLocation->final_assessment;
             return [
-                Stat::make('Peringkat Tertinggi', $topLocation->name)
+                Stat::make(__('(Peringkat Tertinggi)'), $topLocation->name)
                     ->description("Skor: {$scoreData['final_score']} ({$scoreData['rank']})")
                     ->descriptionIcon('heroicon-m-trophy')
                     ->color('success'),
@@ -34,8 +34,8 @@ class TopLocationWidget extends BaseWidget
 
         // Tampilkan pesan default jika tidak ada data
         return [
-            Stat::make('Peringkat Tertinggi', 'N/A')
-                ->description('Belum ada lokasi yang penilaiannya disetujui.')
+            Stat::make(__('Peringkat Tertinggi'), 'N/A')
+                ->description(__('Belum ada lokasi yang penilaiannya disetujui.'))
                 ->color('gray'),
         ];
     }

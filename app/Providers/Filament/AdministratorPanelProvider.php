@@ -19,12 +19,21 @@ use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Filament\Navigation\NavigationGroup;
+use Filament\Support\Facades\FilamentView;
+use Illuminate\Support\Facades\Blade;
+
+
 
 class AdministratorPanelProvider extends PanelProvider
 {
     public function panel(Panel $panel): Panel
     {
+            FilamentView::registerRenderHook(
+            'panels::global-search.after', // Kaitkan setelah komponen pencarian global
+            fn (): string => Blade::render('@livewire(\'language-switcher\')')
+        );
         return $panel
+            ->favicon(asset('img/favicon.png'))
             ->brandName('Administrator Panel')
             ->default()
             ->id('administrator')
@@ -47,8 +56,7 @@ class AdministratorPanelProvider extends PanelProvider
                 Widgets\AccountWidget::class,
                 // Widgets\FilamentInfoWidget::class,
             ])
-            ->middleware([
-                
+            ->middleware([   
                 \Illuminate\Session\Middleware\StartSession::class . ':admin_session', // Nama cookie kustom
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,
@@ -59,10 +67,11 @@ class AdministratorPanelProvider extends PanelProvider
                 SubstituteBindings::class,
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
+                \App\Http\Middleware\SetLocale::class,
             ])
             ->navigationGroups([
                 NavigationGroup::make()
-                    ->label('Entitas'), // Ini grup yang kita inginkan
+                    ->label(('Entitas')), // Ini grup yang kita inginkan
 
                     NavigationGroup::make()
                     ->label('Operasional'), 
@@ -76,6 +85,12 @@ class AdministratorPanelProvider extends PanelProvider
                 NavigationGroup::make()
                     ->label('Master Data'), // Grup yang sudah ada di screenshot
 
+                NavigationGroup::make()
+                    ->label('Pengaturan'), // Grup yang sudah ada di screenshot
+
+
+                NavigationGroup::make()
+                    ->label('Settings'), // Grup yang sudah ada di screenshot
                 // Grup yang sudah ada di screenshot
             ])
             ->authGuard('admin')

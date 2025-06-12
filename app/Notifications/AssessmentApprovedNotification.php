@@ -30,13 +30,13 @@ class AssessmentApprovedNotification extends LaravelNotification
         $url = route('filament.assessor.resources.my-assignments.edit', ['record' => $this->assignment->id]);
 
         return FilamentNotification::make()
-            ->title('Penilaian Anda Telah Disetujui!')
+            ->title(__('Penilaian Anda Telah Disetujui!'))
             ->icon('heroicon-o-check-circle')
             ->color('success') // Warna hijau untuk menandakan keberhasilan
-            ->body("Kerja bagus! Penilaian Anda untuk lokasi {$this->assignment->location->name} telah disetujui oleh admin.")
+            ->body(__("Kerja bagus! Penilaian Anda untuk lokasi {$this->assignment->location->name} telah disetujui oleh admin."))
             ->actions([
                 Action::make('view_history')
-                    ->label('Lihat Riwayat Tugas')
+                    ->label(__('Lihat Riwayat Tugas'))
                     ->url($url)
                     ->markAsRead(),
             ])

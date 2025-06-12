@@ -13,35 +13,53 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Models\Location;
+use Filament\Tables\Filters\TernaryFilter;
+
 
 class IndicatorResource extends Resource
 {
     protected static ?string $model = Indicator::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-light-bulb'; // Atau ikon lain yang sesuai
-    protected static ?string $navigationGroup = 'Operasional'; // Atau grup 'Entitas' jika Anda mau
-    protected static ?string $modelLabel = 'Indikator Penilaian';
-    protected static ?string $pluralModelLabel = 'Indikator Penilaian';
-    protected static ?int $navigationSort = 2; // Urutan dalam grup
+    // protected static ?string $navigationGroup = 'Operasional'; // Atau grup 'Entitas' jika Anda mau
+    protected static ?int $navigationSort = 2;    
+
+    public static function getNavigationGroup(): ?string
+    {
+        return __('Operasional'); // Grup navigasi untuk Asesor
+    }
+    public static function getNavigationLabel(): string
+    {
+        return __('Indikator Penilaian');
+    }
+    public static function getPluralModelLabel(): string
+    {
+        return __('Indikator Penilaian');
+    }
+    public static function getModelLabel(): string
+    {
+        return __('Indikator');
+    }
+    
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                Forms\Components\Section::make('Informasi Dasar Indikator')
+                Forms\Components\Section::make(__('Informasi Dasar Indikator'))
                     ->columns(2)
                     ->schema([
                         Forms\Components\Textarea::make('name')
                             ->required()
-                            ->label('Nama/Deskripsi Indikator')
+                            ->label(__('Nama/Deskripsi Indikator'))
                             ->columnSpanFull()
-                            ->helperText('Isi dengan pertanyaan atau pernyataan lengkap dari indikator.'),
+                            ->helperText(__('Isi dengan pertanyaan atau pernyataan lengkap dari indikator.')),
                         Forms\Components\TextInput::make('category')
-                            ->label('Kategori Indikator')
-                            ->helperText('Contoh: Dukungan Pemerintah, Pendidikan, Infrastruktur.')
+                            ->label(__('Kategori Indikator'))
+                            ->helperText(__('Contoh: Dukungan Pemerintah, Pendidikan, Infrastruktur.'))
                             ->maxLength(255),
-                            Forms\Components\Select::make('target_location_type')
-                            ->label('Target Jenis Lokasi')
+                        Forms\Components\Select::make('target_location_type')
+                            ->label(__('Target Jenis Lokasi'))
                             ->options(function (): array {
                                 // Ambil semua nilai unik dari kolom 'location_type' di tabel 'locations'
                                 $locationTypes = Location::query()
@@ -53,53 +71,53 @@ class IndicatorResource extends Resource
                                     ->all();
                                 
                                 // Tambahkan opsi 'all' secara manual jika selalu diperlukan
-                                $locationTypes['all'] = 'Semua Jenis Lokasi (all)';
-                                
+                                $locationTypes['all'] = __('Semua Jenis Lokasi (all)');
+
                                 // Urutkan berdasarkan key (opsional, untuk tampilan yang rapi)
                                 ksort($locationTypes);
 
                                 return $locationTypes;
                             })
                             ->searchable()
-                            ->helperText('Untuk jenis lokasi mana indikator ini berlaku.'),
+                            ->helperText(__('Untuk jenis lokasi mana indikator ini berlaku.')),
                         Forms\Components\TextInput::make('weight')
                             ->required()
                             ->numeric()
                             ->default(1)
                             ->minValue(0)
-                            ->label('Bobot Indikator'),
+                            ->label(__('Bobot Indikator')),
                         Forms\Components\Select::make('scale_type')
-                            ->label('Tipe Skala Penilaian')
+                            ->label(__('Tipe Skala Penilaian'))
                             ->options([
-                                'Skala 1-2' => 'Skala 1-2',
-                                'Skala 1-3' => 'Skala 1-3',
-                                'Skala 1-4' => 'Skala 1-4',
-                                'Skala 1-5' => 'Skala 1-5',
+                                'Skala 1-2' => __('Skala 1-2'),
+                                'Skala 1-3' => __('Skala 1-3'),
+                                'Skala 1-4' => __('Skala 1-4'),
+                                'Skala 1-5' => __('Skala 1-5'),
                                 // 'Ya/Tidak' => 'Ya/Tidak',
                                 // 'Ada/Tidak Ada' => 'Ada/Tidak Ada',
-                                'Kustom' => 'Kustom (Lihat Kriteria)',
+                                'Kustom' => __('Kustom (Lihat Kriteria)'),
                             ])
                             ->searchable()
-                            ->helperText('Jenis skala yang digunakan untuk menilai.'),
+                            ->helperText(__('Jenis skala yang digunakan untuk menilai.')),
                         Forms\Components\Toggle::make('is_active')
                             ->required()
                             ->default(true)
-                            ->label('Status Aktif'),
+                            ->label(__('Status Aktif')),
                     ]),
 
-                Forms\Components\Section::make('Detail Panduan untuk Asesor')
+                Forms\Components\Section::make(__('Detail Panduan untuk Asesor'))
                     ->schema([
                         Forms\Components\Textarea::make('keywords')
-                            ->label('Kata Kunci (Keywords)')
-                            ->helperText('Kata kunci untuk membantu asesor melakukan pencarian atau observasi.')
+                            ->label(__('Kata Kunci (Keywords)'))
+                            ->helperText(__('Kata kunci untuk membantu asesor melakukan pencarian atau observasi.'))
                             ->columnSpanFull(),
                         Forms\Components\Textarea::make('measurement_method')
-                            ->label('Cara Pengukuran')
-                            ->helperText('Metode atau langkah yang disarankan untuk asesor menilai indikator ini.')
+                            ->label(__('Cara Pengukuran'))
+                            ->helperText(__('Metode atau langkah yang disarankan untuk asesor menilai indikator ini.'))
                             ->columnSpanFull(),
                         Forms\Components\Textarea::make('scoring_criteria_text')
-                            ->label('Teks Kriteria Penilaian')
-                            ->helperText('Deskripsi detail level-level kriteria penilaian dan skor terkaitnya. Ini akan ditampilkan ke asesor.')
+                            ->label(__('Teks Kriteria Penilaian'))
+                            ->helperText(__('Deskripsi detail level-level kriteria penilaian dan skor terkaitnya. Ini akan ditampilkan ke asesor.'))
                             ->columnSpanFull()
                             ->rows(6), // Beri lebih banyak baris
                     ]),
@@ -111,27 +129,27 @@ class IndicatorResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('name')
-                    ->label('Indikator')
+                    ->label(__('Indikator'))
                     ->limit(50)
                     ->tooltip(fn (Indicator $record): string => $record->name) // Tooltip untuk teks penuh
                     ->searchable()
                     ->wrap(),
                 Tables\Columns\TextColumn::make('category')
-                    ->label('Kategori')
+                    ->label(__('Kategori'))
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('target_location_type')
-                    ->label('Target Lokasi')
+                    ->label(__('Target Lokasi'))
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('weight')
-                    ->label('Bobot')
+                    ->label(__('Bobot'))
                     ->sortable(),
                 Tables\Columns\IconColumn::make('is_active')
-                    ->label('Aktif')
+                    ->label(__('Aktif'))
                     ->boolean(),
                 Tables\Columns\TextColumn::make('updated_at')
-                    ->label('Terakhir Diubah')
+                    ->label(__('Terakhir Diubah'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -139,7 +157,7 @@ class IndicatorResource extends Resource
             ->filters([
                 Tables\Filters\SelectFilter::make('category')
                     ->options(fn () => Indicator::query()->select('category')->distinct()->whereNotNull('category')->pluck('category', 'category')->all())
-                    ->label('Filter Kategori'),
+                    ->label(__('Filter Kategori')),
                 Tables\Filters\SelectFilter::make('target_location_type')
                     //  ->options([
                     //     'city' => 'Kota (City)',
@@ -158,10 +176,10 @@ class IndicatorResource extends Resource
                             'Ruang Publik' => 'Ruang Publik',
                             'all' => 'Semua Jenis Lokasi',
                         ])
-                    
-                    ->label('Filter Target Lokasi'),
+
+                    ->label(__('Filter Target Lokasi')),
                 Tables\Filters\TernaryFilter::make('is_active')
-                    ->label('Status Aktif'),
+                    ->label(__('Status Aktif')),
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(),

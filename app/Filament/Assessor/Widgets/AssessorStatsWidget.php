@@ -29,16 +29,16 @@ class AssessorStatsWidget extends BaseWidget
                                             ->count();
 
         return [
-            Stat::make('Tugas Aktif', $activeAssignments)
-                ->description('Tugas baru atau yang sedang dikerjakan')
+            Stat::make(__('Tugas Aktif'), $activeAssignments)
+                ->description(__('Tugas baru atau yang sedang dikerjakan'))
                 ->descriptionIcon('heroicon-m-clipboard-document-list')
                 ->color('primary'),
-            Stat::make('Perlu Revisi', $revisionNeededAssignments)
-                ->description('Tugas yang dikembalikan oleh admin untuk diperbaiki')
+            Stat::make(__('Perlu Revisi'), $revisionNeededAssignments)
+                ->description(__('Tugas yang dikembalikan oleh admin untuk diperbaiki'))
                 ->descriptionIcon('heroicon-m-arrow-uturn-left')
                 ->color('danger'),
-            Stat::make('Tugas Selesai', $completedAssignments)
-                ->description('Total tugas yang telah Anda selesaikan')
+            Stat::make(__('Tugas Selesai'), $completedAssignments)
+                ->description(__('Total tugas yang telah Anda selesaikan'))
                 ->descriptionIcon('heroicon-m-check-badge')
                 ->color('success'),
         ];

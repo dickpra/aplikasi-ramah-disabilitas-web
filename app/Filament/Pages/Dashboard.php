@@ -24,8 +24,9 @@ class Dashboard extends BaseDashboard
     {
         $admin = Auth::guard('admin')->user();
         $name = $admin?->name ?? 'Admin';
+        $string = (__('Selamat Datang, '));
 
-        return ((__("Welcome, {$name}!")));
+        return (__("$string $name"));
     }
 
 

@@ -82,7 +82,20 @@ class TranslationResource extends Resource
                         $defaultLangCode = Language::where('is_default', true)->first()?->code ?? config('app.fallback_locale');
                         return $record->text[$defaultLangCode] ?? 'N/A';
                     }),
+                Tables\Columns\TextColumn::make('created_at')
+                    ->label(__('Dibuat Pada'))
+                    ->sortable()
+                    ->formatStateUsing(function ($state, Translation $record) {
+                        return $record->created_at->format('d/m/Y H:i:s');
+                    }),
+                Tables\Columns\TextColumn::make('updated_at')
+                    ->label(__('Diupdate Pada'))
+                    ->sortable()
+                    ->formatStateUsing(function ($state, Translation $record) {
+                        return $record->created_at->format('d/m/Y H:i:s');
+                    }),
             ])
+
             ->filters([
                 Tables\Filters\SelectFilter::make('created_at_order')
                     ->label('Urutan Waktu')

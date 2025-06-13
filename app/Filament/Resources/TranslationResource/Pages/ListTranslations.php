@@ -14,7 +14,9 @@ use Symfony\Component\Finder\Finder;
 use Filament\Forms;
 use Stichoza\GoogleTranslate\GoogleTranslate;
 use Symfony\Component\HttpFoundation\StreamedResponse;
-
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
+use ZipArchive;
 // Ganti ini dengan library client API terjemahan yang Anda gunakan.
 // Contoh ini menggunakan library konseptual.
 // Jika menggunakan Google, bisa jadi: use Google\Cloud\Translate\V2\TranslateClient;
@@ -36,24 +38,41 @@ class ListTranslations extends ListRecords
             // **GRUP AKSI EXPORT/IMPORT YANG BARU**
             Actions\ActionGroup::make([
                 Actions\Action::make('exportCsv')
-                    ->label('Export ke CSV')
+                    ->label('Export ke CSV (Backup)')
                     ->icon('heroicon-o-table-cells')
                     ->action('exportToCsv'),
                 
                 Actions\Action::make('importCsv')
-                    ->label('Import dari CSV')
+                    ->label('Import dari CSV (Backup)')
                     ->icon('heroicon-o-arrow-up-tray')
                     ->form([
                         Forms\Components\FileUpload::make('attachment')
                             ->label('File CSV')
                             ->required()
-                            ->acceptedFileTypes(['text/csv', 'text/plain']),
+                            ->acceptedFileTypes(['text/csv', 'text/plain'])
                     ])
-                    ->action(function (array $data) {
-                        $this->importFromCsv($data['attachment']);
-                    }),
-            ])->label('Import/Export')->button()->icon('heroicon-o-arrows-up-down')->color('info'),
+                    ->action(fn(array $data) => $this->importFromCsv($data['attachment'])),
 
+                // **TOMBOL BARU DITAMBAHKAN DI SINI**
+                Actions\Action::make('exportLangToZip')
+                    ->label('Export Folder Lang (.zip)')
+                    ->icon('heroicon-o-cloud-arrow-down')
+                    ->action('exportLangToZip'),
+                
+                Actions\Action::make('importLangFilesFromZip')
+                    ->label('Import Folder Lang (.zip)')
+                    ->icon('heroicon-o-cloud-arrow-up')
+                    ->modalDescription('Upload satu file .zip yang berisi semua file bahasa Anda (e.g., id.json, en.json) untuk memperbarui server.')
+                    ->form([
+                        Forms\Components\FileUpload::make('zip_file')
+                            ->label('File .zip Bahasa')
+                            ->required()
+                            ->acceptedFileTypes(['application/zip']),
+                    ])
+                    ->action(fn(array $data) => $this->importLangFilesFromZip($data['zip_file'])),
+            ])->label('Import/Export File')->button()->icon('heroicon-o-document-arrow-down')->color('info'),
+
+                        
             Actions\Action::make('scan')
                 ->label('Scan Translations')
                 ->icon('heroicon-o-magnifying-glass')
@@ -122,14 +141,15 @@ class ListTranslations extends ListRecords
      */
     public function scanAndSaveTranslations(): void
     {
-        Notification::make()
-        ->title('Scanning started...')
-        ->body('The system is now scanning project files.')->info()->send();
+        Notification::make()->title('Scanning started...')->body('The system is now scanning project files.')->info()->send();
+        
         $path = base_path();
         $excludeDirs = ['vendor', 'storage'];
         $pattern = "/(?:__|trans)\(\s*['\"]([^'\"]+)['\"]\s*[\),]/siU";
+        
         $finder = new Finder();
         $finder->in($path)->exclude($excludeDirs)->name(['*.php', '*.vue', '*.js'])->files();
+        
         $allKeys = [];
         foreach ($finder as $file) {
             if (preg_match_all($pattern, $file->getContents(), $matches)) {
@@ -139,43 +159,48 @@ class ListTranslations extends ListRecords
                 }
             }
         }
+        
         $uniqueKeys = array_unique($allKeys);
         $foundCount = count($uniqueKeys);
         $newlyAdded = 0;
+        
         if ($foundCount > 0) {
             $languages = Language::all();
             if ($languages->isEmpty()) {
-                Notification::make()
-                ->title(__('Scan Failed'))
-                ->body(__('No languages found. Please add a language first.'))->danger()->send();
+                Notification::make()->title('Scan Failed')->body('No languages found. Please add a language first.')->danger()->send();
                 return;
             }
 
-            // **== PERUBAHAN LOGIKA ADA DI SINI ==**
-            // Dapatkan kode bahasa default sebelum loop
             $defaultLangCode = Language::where('is_default', true)->first()?->code;
 
+            // **== PERUBAHAN UTAMA DI SINI ==**
+            // 1. Ambil semua key yang ada dari database.
             $existingKeys = Translation::pluck('key')->all();
+            // 2. Buat versi huruf kecil dari semua key tersebut untuk perbandingan yang case-insensitive.
+            $existingKeysLower = array_map('strtolower', $existingKeys);
+
             foreach ($uniqueKeys as $key) {
-                if (!in_array($key, $existingKeys)) {
+                // 3. Bandingkan versi huruf kecil dari key baru dengan daftar huruf kecil yang sudah ada.
+                if (!in_array(strtolower($key), $existingKeysLower)) {
                     $newlyAdded++;
                     $textValues = [];
                     foreach ($languages as $language) {
-                        // Jika bahasa saat ini adalah bahasa default, isi teksnya dengan key itu sendiri.
-                        // Jika tidak, biarkan kosong.
                         if ($defaultLangCode && $language->code === $defaultLangCode) {
-                            $textValues[$language->code] = $key;
+                            $textValues[$language->code] = $key; // Tetap simpan dengan case asli
                         } else {
                             $textValues[$language->code] = '';
                         }
                     }
+                    // 4. Buat record baru. Ini dijamin tidak akan duplikat lagi.
                     Translation::create(['key' => $key, 'text' => $textValues]);
                 }
             }
         }
+
         if ($newlyAdded > 0) {
             Artisan::call('cache:clear');
         }
+
         Notification::make()->title('Scan Complete')->body("Found {$foundCount} unique keys. {$newlyAdded} new keys were added to the database.")->success()->send();
     }
 
@@ -313,45 +338,181 @@ class ListTranslations extends ListRecords
     }
 
     /**
-     * Aksi untuk mengimpor data dari file CSV.
-     * @param string $filePath Path sementara dari file yang di-upload.
+     * Import CSV ke tabel `translations`.
+     *
+     * @param  UploadedFile|TemporaryUploadedFile|string  $file
      */
-    public function importFromCsv(string $filePath): void
+    protected function importFromCsv($file): void
+{
+    try {
+        // 1) Tentukan path fisik
+        if ($file instanceof UploadedFile) {
+            $path = $file->getRealPath();
+            $cleanup = fn() => $file->delete();
+        } elseif (is_string($file)) {
+            // coba di disk lokal
+            if (Storage::disk('local')->exists($file)) {
+                $path = Storage::disk('local')->path($file);
+                $cleanup = fn() => Storage::disk('local')->delete($file);
+            }
+            // jika tidak, coba di disk public
+            elseif (Storage::disk('public')->exists($file)) {
+                $path = Storage::disk('public')->path($file);
+                $cleanup = fn() => Storage::disk('public')->delete($file);
+            } else {
+                throw new \Exception("File CSV tidak ditemukan: {$file}");
+            }
+        } else {
+            throw new \Exception('Tipe file tidak didukung.');
+        }
+
+        if (! file_exists($path)) {
+            throw new \Exception("Path file tidak ada: {$path}");
+        }
+
+        // 2) Buka CSV
+        if (! $handle = fopen($path, 'r')) {
+            throw new \Exception("Gagal membuka file CSV: {$path}");
+        }
+
+        // 3) Baca header
+        $header = fgetcsv($handle);
+        if (! is_array($header)) {
+            fclose($handle);
+            throw new \Exception('Header CSV kosong atau tidak valid.');
+        }
+
+        // 4) Proses baris demi baris
+        $importedCount = 0;
+        while (($row = fgetcsv($handle)) !== false) {
+            $data = array_combine($header, $row) ?: [];
+            if (empty($data['key'])) {
+                continue;
+            }
+            $key = $data['key'];
+            unset($data['key']);
+
+            Translation::updateOrCreate(
+                ['key'  => $key],
+                ['text' => $data]
+            );
+
+            $importedCount++;
+        }
+        fclose($handle);
+
+        // 5) Hapus file
+        $cleanup();
+
+        // 6) Notifikasi sukses
+        Notification::make()
+            ->title('Import Berhasil')
+            ->body("{$importedCount} baris berhasil diimpor.")
+            ->success()
+            ->send();
+    } catch (\Exception $e) {
+        Notification::make()
+            ->title('Import Gagal')
+            ->body($e->getMessage())
+            ->danger()
+            ->send();
+    }
+}
+
+public function exportLangToZip()
     {
         try {
-            $path = storage_path('app/' . $filePath);
-            $file = fopen($path, 'r');
+            $langPath = lang_path();
+            $files = File::files($langPath);
 
-            // Baca header untuk memetakan kolom
-            $header = fgetcsv($file);
-            if ($header === false) {
-                throw new \Exception('File CSV kosong atau tidak valid.');
+            if (empty($files)) {
+                Notification::make()->title('Aksi Dibatalkan')->body('Folder lang tidak berisi file .json untuk diekspor.')->warning()->send();
+                return;
             }
+
+            $zip = new ZipArchive();
+            $zipFileName = 'lang_files_' . now()->format('Y-m-d') . '.zip';
+            // Buat file zip di lokasi temporary
+            $tempZipPath = tempnam(sys_get_temp_dir(), 'zip');
+
+            if ($zip->open($tempZipPath, ZipArchive::CREATE) !== TRUE) {
+                throw new \Exception('Tidak dapat membuat file .zip.');
+            }
+
+            foreach ($files as $file) {
+                if ($file->getExtension() === 'json') {
+                    $zip->addFile($file->getRealPath(), $file->getFilename());
+                }
+            }
+            $zip->close();
             
-            $importedCount = 0;
-            while (($row = fgetcsv($file)) !== false) {
-                // Gabungkan header dengan baris data menjadi array asosiatif
-                $data = array_combine($header, $row);
+            // Kirim file zip ke browser dan hapus setelah terkirim
+            return response()->download($tempZipPath, $zipFileName)->deleteFileAfterSend(true);
 
-                $key = $data['key'] ?? null;
-                if (!$key) continue;
-
-                unset($data['key']); // Hapus key dari data agar sisanya adalah bahasa
-
-                // Gunakan updateOrCreate untuk efisiensi
-                Translation::updateOrCreate(
-                    ['key' => $key],
-                    ['text' => $data]
-                );
-                $importedCount++;
-            }
-            fclose($file);
-            File::delete($path); // Hapus file sementara
-
-            Notification::make()->title('Import Berhasil')->body("{$importedCount} baris berhasil diimpor dan diperbarui.")->success()->send();
-        
         } catch (\Exception $e) {
-            Notification::make()->title('Import Gagal')->body($e->getMessage())->danger()->send();
+            Notification::make()->title('Export Gagal')->body($e->getMessage())->danger()->send();
+            return null;
+        }
+    }
+
+protected function importLangFilesFromZip($file): void
+    {
+        try {
+            // 1) Tentukan path fisik menggunakan logika yang terbukti andal
+            $path = null;
+            $cleanup = function() {}; // Default cleanup function
+            if ($file instanceof UploadedFile) {
+                $path = $file->getRealPath();
+            } elseif (is_string($file)) {
+                if (Storage::disk('local')->exists($file)) {
+                    $path = Storage::disk('local')->path($file);
+                    $cleanup = fn() => Storage::disk('local')->delete($file);
+                } elseif (Storage::disk('public')->exists($file)) {
+                    $path = Storage::disk('public')->path($file);
+                    $cleanup = fn() => Storage::disk('public')->delete($file);
+                } else {
+                    throw new \Exception("File .zip tidak ditemukan: {$file}");
+                }
+            } else {
+                throw new \Exception('Tipe file tidak didukung.');
+            }
+
+            if (! file_exists($path)) {
+                throw new \Exception("Path file tidak ada: {$path}");
+            }
+
+            // 2) Buka dan proses file .zip
+            $zip = new ZipArchive;
+            $res = $zip->open($path);
+            $filesUpdated = 0;
+
+            if ($res === TRUE) {
+                $langDestinationPath = lang_path();
+                if (!File::isDirectory($langDestinationPath)) {
+                    File::makeDirectory($langDestinationPath, 0755, true, true);
+                }
+
+                for ($i = 0; $i < $zip->numFiles; $i++) {
+                    $fileName = $zip->getNameIndex($i);
+                    if (pathinfo($fileName, PATHINFO_EXTENSION) === 'json' && !str_contains($fileName, '/')) {
+                        $fileContent = $zip->getFromIndex($i);
+                        File::put($langDestinationPath . '/' . $fileName, $fileContent);
+                        $filesUpdated++;
+                    }
+                }
+                $zip->close();
+            } else {
+                throw new \Exception('Gagal membuka file .zip.');
+            }
+
+            // 3) Hapus file sementara jika perlu
+            $cleanup();
+
+            // 4) Notifikasi sukses
+            Notification::make()->title('Update Berhasil')->body("{$filesUpdated} file bahasa berhasil diupdate.")->success()->send();
+
+        } catch (\Exception $e) {
+            Notification::make()->title('Update Gagal')->body($e->getMessage())->danger()->send();
         }
     }
     

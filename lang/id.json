@@ -256,5 +256,10 @@
     "Akun Anda sedang menunggu persetujuan admin": "Akun Anda sedang menunggu persetujuan admin",
     "Akun Anda ditolak admin": "Akun Anda ditolak admin",
     "Setujui Akun": "Setujui Akun",
-    "Tolak": "Tolak"
+    "Tolak": "Tolak",
+    "filament-panels::pages/auth/register.notifications.throttled.title": "filament-panels::pages/auth/register.notifications.throttled.title",
+    "filament-panels::pages/auth/register.notifications.throttled": "filament-panels::pages/auth/register.notifications.throttled",
+    "filament-panels::pages/auth/register.notifications.throttled.body": "filament-panels::pages/auth/register.notifications.throttled.body",
+    "Registrasi Berhasil!": "Registrasi Berhasil!",
+    "Akun Anda telah dibuat dan sedang menunggu persetujuan dari Admin.": "Akun Anda telah dibuat dan sedang menunggu persetujuan dari Admin."
 }

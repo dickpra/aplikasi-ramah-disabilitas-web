@@ -256,5 +256,10 @@
     "Akun Anda sedang menunggu persetujuan admin": "Your account is waiting for admin approval",
     "Akun Anda ditolak admin": "Your account is rejected admin",
     "Setujui Akun": "Approve the account",
-    "Tolak": "Reject"
+    "Tolak": "Reject",
+    "filament-panels::pages/auth/register.notifications.throttled.title": "Filament-Panels :: Pages/Auth/Register.Notifications.Throttled.Title",
+    "filament-panels::pages/auth/register.notifications.throttled": "Filament-Panels :: Pages/Auth/Register.Notifications.Throttled",
+    "filament-panels::pages/auth/register.notifications.throttled.body": "Filament-Panels :: Pages/Auth/Register.Notifications.Throttled.Body",
+    "Registrasi Berhasil!": "Successful registration!",
+    "Akun Anda telah dibuat dan sedang menunggu persetujuan dari Admin.": "Your account has been created and is waiting for approval from the admin."
 }

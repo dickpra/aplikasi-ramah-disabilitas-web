@@ -36,7 +36,10 @@ class AssessorPanelProvider extends PanelProvider
                 // AssessorLogin::class
                 \App\Filament\Assessor\Pages\Auth\Login::class
             )
-            ->registration()
+            ->registration(
+                \App\Filament\Assessor\Pages\Auth\Register::class
+
+            )
             ->colors([
                 'primary' => Color::Amber,
             ])

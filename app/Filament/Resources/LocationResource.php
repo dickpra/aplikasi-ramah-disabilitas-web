@@ -106,6 +106,7 @@ class LocationResource extends Resource
                     })
                     ->searchable()
                     ->required()
+                    ->disabled(fn (Get $get): bool => !$get('country_id')) // <-- KUNCI UTAMA
                     ->createOptionForm(function (Form $form, Get $get) {
                         return $form->schema([
                             // Field country_id sudah otomatis ada dari createOptionUsing,
@@ -223,7 +224,7 @@ class LocationResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
-                Tables\Actions\ViewAction::make(),
+                // Tables\Actions\ViewAction::make(),
                 // Tables\Actions\DeleteAction::make(),
             ])
             ->bulkActions([

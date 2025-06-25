@@ -13,6 +13,8 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Facades\Hash; // Untuk hashing password
+use Filament\Forms\Components\TextInput;
+use Filament\Tables\Actions\Action; // Import Action
 
 
 class AssessorResource extends Resource
@@ -55,6 +57,8 @@ class AssessorResource extends Resource
                     ->required()
                     ->maxLength(255)
                     ->unique(ignoreRecord: true), // Email harus unik, kecuali untuk record yang sedang diedit
+                Forms\Components\TextInput::make('country')->label(__('Negara')),
+                TextInput::make('phone_number')->tel()->label(__('Nomor HP')),
                 Forms\Components\TextInput::make('password')
                     ->label(__('Password'))
                     ->password()
@@ -89,11 +93,20 @@ class AssessorResource extends Resource
                     ->counts('assignments') // Menghitung jumlah relasi 'assignments'
                     ->label(__('Total Tugas'))
                     ->sortable(),
-
                 Tables\Columns\TextColumn::make('assignments_max_updated_at')
                     ->max('assignments', 'updated_at') // Mengambil tanggal update terakhir dari relasi
                     ->label(__('Aktivitas Terakhir'))
                     ->since() // Tampilkan dalam format "x hari yang lalu"
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('status')
+                    ->label(__('Status Aktivasi Akun'))
+                    ->badge()
+                    ->color(fn (string $state): string => match ($state) {
+                        'pending' => 'warning',
+                        'approved' => 'success',
+                        'rejected' => 'danger',
+                        default => 'gray',
+                    })
                     ->sortable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->label(__('Tanggal Terdaftar'))
@@ -111,7 +124,22 @@ class AssessorResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
+                // Tables\Actions\DeleteAction::make(),
+                Action::make('approve')
+                    ->label(__('Setujui Akun'))
+                    ->icon('heroicon-o-check-circle')
+                    ->color('success')
+                    ->requiresConfirmation()
+                    ->action(fn (Assessor $record) => $record->update(['status' => 'approved']))
+                    ->visible(fn (Assessor $record): bool => $record->status !== 'approved'),
+
+                Action::make('reject')
+                    ->label(__('Tolak'))
+                    ->icon('heroicon-o-x-circle')
+                    ->color('danger')
+                    ->requiresConfirmation()
+                    ->action(fn (Assessor $record) => $record->update(['status' => 'rejected']))
+                    ->visible(fn (Assessor $record): bool => in_array($record->status, ['pending', 'approved'])),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

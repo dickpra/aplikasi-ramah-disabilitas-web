@@ -16,4 +16,11 @@ class ListAssessors extends ListRecords
             Actions\CreateAction::make(),
         ];
     }
+    protected function getHeaderWidgets(): array
+    {
+        return [
+            AssessorResource\Widgets\StatsOverview::class,
+        ];
+    }
+    
 }

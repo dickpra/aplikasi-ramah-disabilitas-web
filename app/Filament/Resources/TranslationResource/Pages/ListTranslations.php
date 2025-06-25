@@ -104,7 +104,27 @@ class ListTranslations extends ListRecords
                 ])
                 ->action(function (array $data) {
                     $this->runAutoTranslation($data['target_language']);
-                }),
+                    
+                    try {
+                        // Jalankan Artisan command yang telah kita buat
+                        Artisan::call('translations:sync-files');
+                        
+                        Notification::make()
+                            ->title(__('Sinkronisasi Berhasil'))
+                            ->body(__('Semua file terjemahan .json telah diperbarui sesuai data di database.'))
+                            ->success()
+                            ->send();
+
+                    } catch (\Exception $e) {
+                        Notification::make()
+                            ->title(__('Sinkronisasi Gagal'))
+                            ->body($e->getMessage())
+                            ->danger()
+                            ->send();
+                    }
+                }
+                
+            ),
 
 
                 Actions\Action::make('syncFiles')

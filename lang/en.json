@@ -249,5 +249,12 @@
     "Lihat Riwayat Tugas": "See Task History",
     "Selamat datang": "Welcome",
     "Selamat Datang, ": "WELCOME,",
-    "Diupdate Pada": "Updated on"
+    "Diupdate Pada": "Updated on",
+    "Jumlah Assesor ditugaskan": "The number of assessors is assigned",
+    "Status Aktivasi Akun": "Account activation status",
+    "Akun tidak ditemukan": "Account is not found",
+    "Akun Anda sedang menunggu persetujuan admin": "Your account is waiting for admin approval",
+    "Akun Anda ditolak admin": "Your account is rejected admin",
+    "Setujui Akun": "Approve the account",
+    "Tolak": "Reject"
 }

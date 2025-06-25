@@ -61,7 +61,7 @@
             <header class="bg-white shadow-sm">
                 <div class="flex items-center justify-between px-6 py-4">
                     {{-- Mengganti h1 dengan tag img --}}
-                    <img src="{{ asset('img/Navbar.png') }}" alt="Logo Penilaian Ramah Disabilitas" class="h-10"> {{-- Sesuaikan tinggi (h-10) sesuai kebutuhan Anda --}}
+                    <img src="{{ asset('img/navbar.png') }}" alt="Logo Penilaian Ramah Disabilitas" class="h-10"> {{-- Sesuaikan tinggi (h-10) sesuai kebutuhan Anda --}}
                 </div>
             </header>
 

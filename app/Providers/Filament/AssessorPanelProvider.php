@@ -21,7 +21,7 @@ use App\Filament\Assessor\Pages\Dashboard;
 use App\Http\Middleware\SetAssessorGuard; // <-- 1. IMPORT MIDDLEWARE BARU
 use Illuminate\Database\Eloquent\Model; // Import Model
 use Illuminate\Support\Facades\Auth;  
-
+use App\Filament\Assessor\Pages\Auth\Login as AssessorLogin;
 
 class AssessorPanelProvider extends PanelProvider
 {
@@ -32,7 +32,10 @@ class AssessorPanelProvider extends PanelProvider
             ->brandName('Assessor Panel')
             ->id('assessor')
             ->path('assessor')
-            ->login()
+            ->login(
+                // AssessorLogin::class
+                \App\Filament\Assessor\Pages\Auth\Login::class
+            )
             ->registration()
             ->colors([
                 'primary' => Color::Amber,

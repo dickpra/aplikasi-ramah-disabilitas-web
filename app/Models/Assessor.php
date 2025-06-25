@@ -24,6 +24,7 @@ class Assessor extends Authenticatable implements FilamentUser // Implementasi F
         'phone_number', // <-- Tambahkan
         'country',      // <-- Tambahkan
         'password',
+        'status', 
     ];
 
     protected $hidden = [
@@ -50,5 +51,6 @@ class Assessor extends Authenticatable implements FilamentUser // Implementasi F
     {
         // Izinkan asesor mengakses panel yang ID-nya 'assessor'
         return $panel->getId() === 'assessor';
+        return $this->approved_at !== null;
     }
 }

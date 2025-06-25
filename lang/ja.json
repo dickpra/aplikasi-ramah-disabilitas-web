@@ -249,5 +249,12 @@
     "Lihat Riwayat Tugas": "タスク履歴を参照してください",
     "Selamat datang": "いらっしゃいませ",
     "Selamat Datang, ": "いらっしゃいませ、",
-    "Diupdate Pada": "更新されました"
+    "Diupdate Pada": "更新されました",
+    "Jumlah Assesor ditugaskan": "評価者の数が割り当てられます",
+    "Status Aktivasi Akun": "アカウントのアクティベーションステータス",
+    "Akun tidak ditemukan": "アカウントは見つかりません",
+    "Akun Anda sedang menunggu persetujuan admin": "アカウントは管理者の承認を待っています",
+    "Akun Anda ditolak admin": "アカウントは拒否された管理者です",
+    "Setujui Akun": "アカウントを承認します",
+    "Tolak": "拒否する"
 }

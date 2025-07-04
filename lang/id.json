@@ -261,5 +261,10 @@
     "filament-panels::pages/auth/register.notifications.throttled": "filament-panels::pages/auth/register.notifications.throttled",
     "filament-panels::pages/auth/register.notifications.throttled.body": "filament-panels::pages/auth/register.notifications.throttled.body",
     "Registrasi Berhasil!": "Registrasi Berhasil!",
-    "Akun Anda telah dibuat dan sedang menunggu persetujuan dari Admin.": "Akun Anda telah dibuat dan sedang menunggu persetujuan dari Admin."
+    "Akun Anda telah dibuat dan sedang menunggu persetujuan dari Admin.": "Akun Anda telah dibuat dan sedang menunggu persetujuan dari Admin.",
+    "Kota": "Kota",
+    "Kabupaten": "Kabupaten",
+    "Perguruan Tinggi": "Perguruan Tinggi",
+    "Sekolah": "Sekolah",
+    "Ruang Publik": "Ruang Publik"
 }

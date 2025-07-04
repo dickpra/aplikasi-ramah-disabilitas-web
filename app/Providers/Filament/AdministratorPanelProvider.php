@@ -36,6 +36,7 @@ class AdministratorPanelProvider extends PanelProvider
             ->favicon(asset('img/favicon.png'))
             ->brandName('Administrator Panel')
             ->default()
+            ->profile()
             ->id('administrator')
             ->path('administrator')
             ->login()

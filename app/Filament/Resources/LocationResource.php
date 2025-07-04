@@ -64,8 +64,11 @@ class LocationResource extends Resource
 
             Forms\Components\Select::make('location_type')
                 ->options([
-                    'Kota' => 'Kota', 'Kabupaten' => 'Kabupaten', 'Perguruan Tinggi' => 'Perguruan Tinggi',
-                    'Sekolah' => 'Sekolah', 'Ruang Publik' => 'Ruang Publik',
+                    'Kota' => (__('Kota')), 
+                    'Kabupaten' => (__('Kabupaten')), 
+                    'Perguruan Tinggi' => (__('Perguruan Tinggi')),
+                    'Sekolah' => (__('Sekolah')), 
+                    'Ruang Publik' => (__('Ruang Publik')),
                 ])
                 ->required()->label(__('Jenis Lokasi')),
 

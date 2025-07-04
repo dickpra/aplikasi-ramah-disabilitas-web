@@ -261,5 +261,10 @@
     "filament-panels::pages/auth/register.notifications.throttled": "Filament-Panels :: Pages/Auth/Register.Notifications.Throttled",
     "filament-panels::pages/auth/register.notifications.throttled.body": "Filament-Panels :: Pages/Auth/Register.Notifications.Throttled.Body",
     "Registrasi Berhasil!": "Successful registration!",
-    "Akun Anda telah dibuat dan sedang menunggu persetujuan dari Admin.": "Your account has been created and is waiting for approval from the admin."
+    "Akun Anda telah dibuat dan sedang menunggu persetujuan dari Admin.": "Your account has been created and is waiting for approval from the admin.",
+    "Kota": "City",
+    "Kabupaten": "Regency",
+    "Perguruan Tinggi": "College",
+    "Sekolah": "School",
+    "Ruang Publik": "Public space"
 }

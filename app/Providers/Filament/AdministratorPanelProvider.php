@@ -21,6 +21,8 @@ use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Filament\Navigation\NavigationGroup;
 use Filament\Support\Facades\FilamentView;
 use Illuminate\Support\Facades\Blade;
+use Filament\SpatieLaravelTranslatablePlugin;
+use App\Services\LanguageService; // <-- 1. Import Service Anda
 
 
 
@@ -93,6 +95,11 @@ class AdministratorPanelProvider extends PanelProvider
                 NavigationGroup::make()
                     ->label('Settings'), // Grup yang sudah ada di screenshot
                 // Grup yang sudah ada di screenshot
+            ])
+            ->plugins([
+                SpatieLaravelTranslatablePlugin::make()
+                    // --- 2. GUNAKAN SERVICE DI SINI ---
+                    ->defaultLocales((new LanguageService())->getActiveLocales())
             ])
             ->authGuard('admin')
             ->authMiddleware([

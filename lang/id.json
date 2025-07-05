@@ -266,5 +266,19 @@
     "Kabupaten": "Kabupaten",
     "Perguruan Tinggi": "Perguruan Tinggi",
     "Sekolah": "Sekolah",
-    "Ruang Publik": "Ruang Publik"
+    "Ruang Publik": "Ruang Publik",
+    "Buat Indikator/Instrument Baru": "Buat Indikator/Instrument Baru",
+    "Terjemahkan Semua yang Kosong": "Terjemahkan Semua yang Kosong",
+    "Terjemahkan Semua Indikator": "Terjemahkan Semua Indikator",
+    "Ini akan memulai proses penerjemahan otomatis untuk semua indikator yang terjemahannya masih kosong. Proses berjalan di latar belakang. Lanjutkan?": "Ini akan memulai proses penerjemahan otomatis untuk semua indikator yang terjemahannya masih kosong. Proses berjalan di latar belakang. Lanjutkan?",
+    "Proses Terjemahan Massal Dimulai": "Proses Terjemahan Massal Dimulai",
+    "Terjemahkan Otomatis": "Terjemahkan Otomatis",
+    "Ini akan menerjemahkan semua field dari Bahasa Indonesia ke bahasa lain yang kosong. Pastikan field Bahasa Indonesia sudah terisi.": "Ini akan menerjemahkan semua field dari Bahasa Indonesia ke bahasa lain yang kosong. Pastikan field Bahasa Indonesia sudah terisi.",
+    "Penerjemahan Selesai": "Penerjemahan Selesai",
+    "Error Terjemahan": "Error Terjemahan",
+    "Terjemahkan": "Terjemahkan",
+    "Ini akan memulai proses penerjemahan otomatis di latar belakang. Anda akan diberi tahu jika sudah selesai.": "Ini akan memulai proses penerjemahan otomatis di latar belakang. Anda akan diberi tahu jika sudah selesai.",
+    "Proses Terjemahan Dimulai": "Proses Terjemahan Dimulai",
+    "Indikator telah ditambahkan ke antrian untuk diterjemahkan.": "Indikator telah ditambahkan ke antrian untuk diterjemahkan.",
+    "Refresh Daftar Bahasa": "Refresh Daftar Bahasa"
 }

@@ -13,24 +13,19 @@ class LanguageSwitcher extends Component
 
     public function mount(): void
     {
-        // Ambil semua bahasa yang tersedia dari database
         $this->languages = Language::all();
-        // Atur locale saat ini dari sesi, atau gunakan default aplikasi
         $this->currentLocale = session('locale', App::getLocale());
     }
 
-    /**
-     * Fungsi yang akan dipanggil saat bahasa baru dipilih.
-     *
-     * == FIX DI SINI ==
-     * Menghapus return type hint ': \Illuminate\Http\RedirectResponse'
-     */
     public function switchLocale(string $localeCode)
     {
-        // Simpan pilihan bahasa ke sesi pengguna
+        // 1. Simpan pilihan bahasa ke sesi pengguna
         session(['locale' => $localeCode]);
 
-        // Muat ulang halaman saat ini untuk menerapkan bahasa baru
+        // 2. Kirim sinyal ke komponen lain di halaman bahwa bahasa telah berganti
+        $this->dispatch('localeSwitched', locale: $localeCode);
+
+        // 3. Muat ulang halaman saat ini untuk menerapkan perubahan bahasa pada UI statis (seperti __())
         return redirect(request()->header('Referer'));
     }
 

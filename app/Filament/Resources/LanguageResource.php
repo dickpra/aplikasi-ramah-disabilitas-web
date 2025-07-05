@@ -11,6 +11,9 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
+use Filament\Tables\Actions\Action;
+use Illuminate\Support\Facades\Cache;
+
 
 class LanguageResource extends Resource
 {
@@ -106,6 +109,17 @@ class LanguageResource extends Resource
             ->actions([
                 Tables\Actions\EditAction::make(),
             ])
+            ->headerActions([
+            Action::make('clear_language_cache')
+                ->label(__('Refresh Daftar Bahasa'))
+                ->icon('heroicon-o-arrow-path')
+                ->color('warning')
+                ->action(function () {
+                    Cache::forget('active_locales');
+                    Notification::make()->success()->title('Cache Bahasa Dihapus')->body('Daftar bahasa akan diperbarui pada request berikutnya.')->send();
+                })
+                // ->helperText('Klik ini jika Anda baru saja menambah atau menghapus bahasa.'),
+        ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make()

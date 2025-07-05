@@ -266,5 +266,19 @@
     "Kabupaten": "Regency",
     "Perguruan Tinggi": "College",
     "Sekolah": "School",
-    "Ruang Publik": "Public space"
+    "Ruang Publik": "Public space",
+    "Buat Indikator/Instrument Baru": "Create a new indicator/instrument",
+    "Terjemahkan Semua yang Kosong": "Translate all the empty",
+    "Terjemahkan Semua Indikator": "Translate all indicators",
+    "Ini akan memulai proses penerjemahan otomatis untuk semua indikator yang terjemahannya masih kosong. Proses berjalan di latar belakang. Lanjutkan?": "This will start the automatic translation process for all indicators whose translation is still empty. The process runs in the background. Continue?",
+    "Proses Terjemahan Massal Dimulai": "The mass translation process begins",
+    "Terjemahkan Otomatis": "Translate automatically",
+    "Ini akan menerjemahkan semua field dari Bahasa Indonesia ke bahasa lain yang kosong. Pastikan field Bahasa Indonesia sudah terisi.": "This will translate all fields from Indonesian to other empty languages. Make sure the Indonesian field is filled.",
+    "Penerjemahan Selesai": "Translation is complete",
+    "Error Terjemahan": "Translation error",
+    "Terjemahkan": "Translate",
+    "Ini akan memulai proses penerjemahan otomatis di latar belakang. Anda akan diberi tahu jika sudah selesai.": "This will start the automatic translation process in the background. You will be told if it's finished.",
+    "Proses Terjemahan Dimulai": "The translation process begins",
+    "Indikator telah ditambahkan ke antrian untuk diterjemahkan.": "The indicator has been added to the queue to be translated.",
+    "Refresh Daftar Bahasa": "Refresh Language List"
 }

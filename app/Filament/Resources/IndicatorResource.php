@@ -14,10 +14,16 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Models\Location;
 use Filament\Tables\Filters\TernaryFilter;
+use Filament\Resources\Concerns\Translatable; // <-- 1. Pastikan Trait Resource di-import
+
+use App\Jobs\AutoTranslateIndicatorFields;
+use Filament\Tables\Actions\Action;
+use Filament\Notifications\Notification;
 
 
 class IndicatorResource extends Resource
 {
+    use Translatable;
     protected static ?string $model = Indicator::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-light-bulb'; // Atau ikon lain yang sesuai
@@ -40,6 +46,7 @@ class IndicatorResource extends Resource
     {
         return __('Indikator');
     }
+    
     
 
     public static function form(Form $form): Form
@@ -185,7 +192,25 @@ class IndicatorResource extends Resource
                 Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(), // Tambahkan jika perlu, atau custom action untuk Nonaktifkan
-            ])
+           Tables\Actions\EditAction::make(),
+                Action::make('auto_translate')
+                    ->label(__('Terjemahkan'))
+                    ->icon('heroicon-o-language')
+                    ->color('warning')
+                    ->requiresConfirmation()
+                    ->modalDescription(__('Ini akan memulai proses penerjemahan otomatis di latar belakang. Anda akan diberi tahu jika sudah selesai.'))
+                    ->action(function (Indicator $record) {
+                        // Memicu job untuk berjalan di latar belakang
+                        AutoTranslateIndicatorFields::dispatch($record, auth()->user());
+
+                        // Beri feedback instan ke admin
+                        Notification::make()
+                            ->title(__('Proses Terjemahan Dimulai'))
+                            ->body(__('Indikator telah ditambahkan ke antrian untuk diterjemahkan.'))
+                            ->info()
+                            ->send();
+                    }),
+        ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),

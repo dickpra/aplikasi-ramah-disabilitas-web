@@ -34,7 +34,7 @@ class ListIndicators extends ListRecords
             
             // --- TOMBOL AKSI BARU UNTUK TERJEMAHKAN SEMUA ---
             Actions\Action::make('auto_translate_all')
-                ->label(__('Terjemahkan Semua yang Kosong'))
+                ->label(__('Terjemahkan Semua Indikator'))
                 ->icon('heroicon-o-globe-alt')
                 ->color('warning')
                 ->requiresConfirmation()

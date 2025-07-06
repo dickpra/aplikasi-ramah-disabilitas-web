@@ -260,22 +260,22 @@
                 const marker = L.marker([loc.lat, loc.lng], { icon: icon });
                 
                 const popupContent = `
-                    <div class="font-sans p-1">
-                        <div class="p-3">
-                            <h3 class="text-base font-bold text-gray-900">${loc.name}</h3>
-                            <p class="text-sm text-gray-500">${loc.province ? loc.province.name : ''}, ${loc.province && loc.province.country ? loc.province.country.name : 'Indonesia'}</p>
+                    <div class="p-3">
+                        <h3 class="text-base font-bold text-white">${loc.name}</h3>
+                        <p class="text-sm text-gray-400">${loc.province ? loc.province.name : ''}, ${loc.province && loc.province.country ? loc.province.country.name : 'Indonesia'}</p>
+                    </div>
+                    <div class="mt-1 pt-3 px-4 pb-3 border-t border-gray-700">
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm font-medium text-gray-300">Peringkat:</span>
+                            <span class="px-3 py-1 text-xs font-bold text-white rounded-full" style="background-color: ${rank.color};">${rank.name}</span>
                         </div>
-                        <div class="mt-1 pt-3 px-4 pb-3 border-t border-gray-100">
-                            <div class="flex justify-between items-center">
-                                <span class="text-sm font-medium text-gray-600">Peringkat:</span>
-                                <span class="px-3 py-1 text-xs font-bold text-white rounded-full" style="background-color: ${rank.color};">${rank.name}</span>
-                            </div>
-                            <div class="flex justify-between items-center mt-2">
-                                <span class="text-sm font-medium text-gray-600">Skor:</span>
-                                <span class="font-bold text-gray-800">${score.toFixed(2)}</span>
-                            </div>
+                        <div class="flex justify-between items-center mt-2">
+                            <span class="text-sm font-medium text-gray-300">Skor:</span>
+                            <span class="font-bold text-white">${score.toFixed(2)}</span>
                         </div>
-                    </div>`;
+                    </div>
+                </div>
+                `;
                 
                 marker.bindPopup(popupContent, { className: 'custom-popup' });
                 markers.addLayer(marker);

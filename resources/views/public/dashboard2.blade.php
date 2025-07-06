@@ -184,7 +184,7 @@
   </section>
 
   <!-- Peringkat Section -->
-<section class="max-w-5xl mx-auto px-6 pb-24">
+<section class="container mx-auto px-4 sm:px-1 lg:px-8 pb-10">
   <div class="bg-dark-card p-8 rounded-2xl shadow-xl border border-dark-border">
     <!-- Header -->
     <div class="flex items-center justify-between mb-8">

@@ -26,5 +26,6 @@ Route::get('/', [PublicDashboardController::class, 'dashboard'])->name('dashboar
 Route::get('/2', [PublicDashboardController::class, 'dashboard2'])->name('dashboard.public2');
 // Rute untuk halaman peta
 Route::get('/peta-lokasi', [PublicDashboardController::class, 'map'])->name('map.public');
+Route::get('/peta-lokasi-2', [PublicDashboardController::class, 'map2'])->name('map.public2');
 
 

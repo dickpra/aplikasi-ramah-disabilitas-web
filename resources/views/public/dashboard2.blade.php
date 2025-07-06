@@ -84,6 +84,19 @@
     <img src="{{ asset('img/navbar.png') }}" class="h-10" alt="Logo" />
     <nav class="space-x-4">
       <a href="{{ route('map.public') }}" class="text-accent-500 hover:underline font-semibold">Peta Persebaran</a>
+      {{-- Tombol Ganti Versi --}}
+                @php
+                    $currentRoute = request()->route()->getName();
+                    $isVersion1 = $currentRoute === 'dashboard.public';
+                    $targetRoute = $isVersion1 ? route('dashboard.public2') : route('dashboard.public');
+                    $targetLabel = $isVersion1 ? 'Versi UI 2' : 'Versi UI 1';
+                @endphp
+
+                <a href="{{ $targetRoute }}"
+                class="px-4 py-2 rounded-md text-sm font-semibold transition-all duration-300
+                        bg-accent-500 text-dark-bg hover:bg-accent-600 dark:bg-white dark:text-primary-700 dark:hover:bg-gray-100">
+                    {{ $targetLabel }}
+                </a>
     </nav>
   </header>
 
@@ -171,41 +184,100 @@
   </section>
 
   <!-- Peringkat Section -->
-  <section class="max-w-5xl mx-auto px-6 pb-24">
-    <div class="bg-dark-card p-8 rounded-2xl shadow-xl border border-dark-border">
-      <div class="flex items-center justify-between mb-8">
-        <h2 class="text-3xl font-bold text-white">🏆 Peringkat Lokasi Terbaik</h2>
-        <a href="{{ route('map.public') }}" class="text-accent-500 hover:text-accent-400 flex items-center gap-2 transition">
-          Lihat Peta <i class="fas fa-arrow-right"></i>
-        </a>
+<section class="max-w-5xl mx-auto px-6 pb-24">
+  <div class="bg-dark-card p-8 rounded-2xl shadow-xl border border-dark-border">
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-8">
+      <h2 class="text-3xl font-bold text-white">🏆 Peringkat Lokasi Terbaik</h2>
+      <a href="{{ route('map.public') }}" class="text-accent-500 hover:text-accent-400 flex items-center gap-2 transition">
+        Lihat Peta <i class="fas fa-arrow-right"></i>
+      </a>
+    </div>
+    
+    <!-- Legenda Peringkat -->
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 text-sm text-white mb-10">
+      <div class="flex items-center gap-2 bg-blue-600/20 p-3 rounded-lg border border-blue-600">
+        <div class="w-3 h-3 bg-blue-400 rounded-full"></div>
+        <span class="font-semibold">Diamond</span>
+        <span class="text-gray-400 ml-auto">≥ 90</span>
       </div>
-      <div class="space-y-4">
-        @forelse ($locations as $location)
-          <div class="flex items-center justify-between bg-dark-bg border border-dark-border p-5 rounded-xl hover:bg-primary-900/50 transition-all duration-300 group">
-            <div class="flex items-center gap-4">
-              <div class="p-3 bg-primary-500 text-white rounded-full">
-                <i class="fas fa-university"></i>
-              </div>
-              <div>
-                <h4 class="font-medium text-white">{{ $location->name }}</h4>
-                <p class="text-sm text-gray-400">{{ $location->province->name ?? 'N/A' }}, {{ $location->province->country->name ?? 'N/A' }}</p>
-              </div>
+      <div class="flex items-center gap-2 bg-yellow-500/20 p-3 rounded-lg border border-yellow-400">
+        <div class="w-3 h-3 bg-yellow-300 rounded-full"></div>
+        <span class="font-semibold">Gold</span>
+        <span class="text-gray-300 ml-auto">75–89.9</span>
+      </div>
+      <div class="flex items-center gap-2 bg-gray-400/20 p-3 rounded-lg border border-gray-300">
+        <div class="w-3 h-3 bg-gray-200 rounded-full"></div>
+        <span class="font-semibold">Silver</span>
+        <span class="text-gray-300 ml-auto">50–74.9</span>
+      </div>
+      <div class="flex items-center gap-2 bg-amber-600/20 p-3 rounded-lg border border-amber-500">
+        <div class="w-3 h-3 bg-amber-400 rounded-full"></div>
+        <span class="font-semibold">Bronze</span>
+        <span class="text-gray-300 ml-auto">25–49.9</span>
+      </div>
+      <div class="flex items-center gap-2 bg-red-600/20 p-3 rounded-lg border border-red-500">
+        <div class="w-3 h-3 bg-red-400 rounded-full"></div>
+        <span class="font-semibold">Participant</span>
+        <span class="text-gray-300 ml-auto">&lt; 25</span>
+      </div>
+    </div>
+
+    <!-- Daftar Lokasi -->
+    <div class="space-y-4">
+      @forelse ($locations as $location)
+        @php
+            $score = $location->final_score;
+            if ($score >= 90) {
+                $rank = 'Diamond';
+                $color = 'bg-blue-600 text-white';
+            } elseif ($score >= 75) {
+                $rank = 'Gold';
+                $color = 'bg-yellow-400 text-gray-900';
+            } elseif ($score >= 50) {
+                $rank = 'Silver';
+                $color = 'bg-gray-300 text-gray-900';
+            } elseif ($score >= 25) {
+                $rank = 'Bronze';
+                $color = 'bg-amber-600 text-white';
+            } else {
+                $rank = 'Participant';
+                $color = 'bg-red-600 text-white';
+            }
+        @endphp
+
+        <div class="flex items-center justify-between bg-dark-bg border border-dark-border p-5 rounded-xl hover:bg-primary-900/50 transition-all duration-300 group">
+          <div class="flex items-center gap-4">
+            <div class="p-3 bg-primary-500 text-white rounded-full">
+              <i class="fas fa-university"></i>
             </div>
+            <div>
+              <h4 class="font-medium text-white">{{ $location->name }}</h4>
+              <p class="text-sm text-gray-400">{{ $location->province->name ?? 'N/A' }}, {{ $location->province->country->name ?? 'N/A' }}</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
             <div class="text-yellow-400 font-bold flex items-center gap-1">
               <i class="fas fa-star"></i>
               {{ number_format($location->final_score, 2) }}
             </div>
+            <span class="text-xs px-3 py-1 rounded-full font-semibold {{ $color }}">
+              {{ $rank }}
+            </span>
           </div>
-        @empty
-          <p class="text-center text-gray-400">Belum ada data peringkat.</p>
-        @endforelse
-      </div>
-
-      <div class="mt-6">
-        {{ $locations->links() }}
-      </div>
+        </div>
+      @empty
+        <p class="text-center text-gray-400">Belum ada data peringkat.</p>
+      @endforelse
     </div>
-  </section>
+
+    <!-- Pagination -->
+    <div class="mt-6">
+      {{ $locations->links() }}
+    </div>
+  </div>
+</section>
+
 
   <!-- Footer -->
   <footer class="bg-dark-card border-t border-dark-border py-12 px-6">

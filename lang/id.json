@@ -280,5 +280,8 @@
     "Ini akan memulai proses penerjemahan otomatis di latar belakang. Anda akan diberi tahu jika sudah selesai.": "Ini akan memulai proses penerjemahan otomatis di latar belakang. Anda akan diberi tahu jika sudah selesai.",
     "Proses Terjemahan Dimulai": "Proses Terjemahan Dimulai",
     "Indikator telah ditambahkan ke antrian untuk diterjemahkan.": "Indikator telah ditambahkan ke antrian untuk diterjemahkan.",
-    "Refresh Daftar Bahasa": "Refresh Daftar Bahasa"
+    "Refresh Daftar Bahasa": "Refresh Daftar Bahasa",
+    "✅ Terjemahan Otomatis Selesai": "✅ Terjemahan Otomatis Selesai",
+    "❌ Terjemahan Otomatis Gagal": "❌ Terjemahan Otomatis Gagal",
+    "Terjadi kesalahan saat auto-translate. Silakan cek log.": "Terjadi kesalahan saat auto-translate. Silakan cek log."
 }

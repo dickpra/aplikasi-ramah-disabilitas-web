@@ -60,4 +60,17 @@ class PublicDashboardController extends Controller
             'locations' => $locations,
         ]);
     }
+    public function map2()
+    {
+        $locations = Location::query()
+            ->whereNotNull('final_score')
+            // ->with('province')
+            ->with('province.country')
+            ->orderBy('final_score', 'desc')
+            ->get(); // Gunakan get() untuk peta agar semua marker ditampilkan
+
+        return view('public.map2', [
+            'locations' => $locations,
+        ]);
+    }
 }

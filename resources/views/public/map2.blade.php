@@ -17,78 +17,77 @@
     <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js" defer></script>
     <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js" defer></script>
     {{-- Alpine.js tidak lagi digunakan, jadi tidak perlu dimuat --}}
+    <script>
+      // Konfigurasi Tailwind CSS agar sesuai dengan tema dasbor
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Poppins', 'sans-serif']
+            },
+            colors: {
+              primary: { 100: '#e0e7ff', 300: '#7c3aed', 500: '#4f46e5', 700: '#3730a3', 900: '#1e1b4b' },
+              accent: { 500: '#a3e635', 700: '#65a30d' },
+              dark: { bg: '#0f172a', card: '#1e293b', border: '#334155' }
+            }
+          }
+        }
+      }
+    </script>
 
-    <style>
-        body { background-color: #f8fafc; /* gray-50 */ font-family: 'Inter', sans-serif; }
-        @import url('https://rsms.me/inter/inter.css');
-        
-        #map-container { position: relative; width: 100%; height: 65vh; min-height: 500px; border-radius: 0.75rem; overflow: hidden; box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1); }
+   <style>
+        body { font-family: 'Poppins', sans-serif; }
+        #map-container { position: relative; width: 100%; height: 65vh; min-height: 500px; border-radius: 1rem; overflow: hidden; border: 1px solid #334155; }
         #map { height: 100%; width: 100%; z-index: 1; }
         
+        /* Overlay Loading Tema Gelap */
         #loading-overlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background-color: rgba(255, 255, 255, 0.8);
+            background-color: rgba(15, 23, 42, 0.8); /* dark-bg dengan opacity */
             backdrop-filter: blur(4px); z-index: 10;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             transition: opacity 0.3s ease-in-out;
         }
         .spinner {
-            border: 5px solid rgba(0, 0, 0, 0.1); width: 50px; height: 50px;
-            border-radius: 50%; border-left-color: #3b82f6; /* blue-500 */
+            border: 5px solid rgba(163, 230, 53, 0.2); width: 50px; height: 50px;
+            border-radius: 50%; border-left-color: #a3e635; /* accent-500 */
             animation: spin 1s linear infinite;
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
+        /* Marker Pin */
         .marker-pin {
-            width: 32px; height: 32px;
-            border-radius: 50% 50% 50% 0;
-            transform: rotate(-45deg);
-            display: flex; align-items: center; justify-content: center;
-            border: 2px solid #ffffff;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            width: 32px; height: 32px; border-radius: 50% 50% 50% 0;
+            transform: rotate(-45deg); display: flex; align-items: center; justify-content: center;
+            border: 2px solid #ffffff; box-shadow: 0 4px 8px rgba(0,0,0,0.5);
         }
         .marker-pin i { transform: rotate(45deg); font-size: 16px; color: white; }
 
-        .custom-popup .leaflet-popup-content-wrapper { background: #fff; border-radius: 0.75rem; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+        /* Popup Kustom Tema Gelap */
+        .custom-popup .leaflet-popup-content-wrapper { background: #1e293b; /* dark-card */ border-radius: 0.75rem; box-shadow: 0 4px 12px rgba(0,0,0,0.25); border: 1px solid #334155; color: white; }
         .custom-popup .leaflet-popup-content { margin: 0; width: 280px !important; }
-        .custom-popup .leaflet-popup-tip { background: #fff; }
+        .custom-popup .leaflet-popup-tip { background: #1e293b; }
 
+        /* Legenda Peta Tema Gelap */
         .legend-control {
-            padding: 12px; background: rgba(255,255,255,0.95);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.2); border-radius: 8px;
-            line-height: 24px; color: #333; width: 200px;
+            padding: 12px; background: rgba(30, 41, 59, 0.9); /* dark-card dengan opacity */
+            box-shadow: 0 2px 8px rgba(0,0,0,0.4); border-radius: 8px;
+            line-height: 24px; color: #e2e8f0; width: 200px; border: 1px solid #334155;
         }
-        .legend-control i { width: 18px; height: 18px; float: left; margin-right: 8px; border-radius: 50%; border: 1px solid rgba(0,0,0,0.2); }
+        .legend-control i { width: 18px; height: 18px; float: left; margin-right: 8px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.2); }
         
-        .grayscale-tiles { filter: grayscale(100%); }
+        /* Filter untuk tile layer terang */
+        .dark-tiles { filter: invert(1) hue-rotate(180deg) brightness(0.9) contrast(0.9); }
     </style>
 </head>
-<body class="bg-gray-100 text-gray-900 font-sans">
+<body class="bg-dark-bg text-white">
 
-    {{-- <header class="bg-white shadow-sm sticky top-0 z-20">
-        <div class="container mx-auto px-6 py-4 flex items-center justify-between">
-            <a href="{{ route('dashboard.public') }}">
-                <img src="{{ asset('img/navbar.png') }}" alt="Logo Indeks Inklusi" class="h-10"> {{-- Sesuaikan tinggi (h-10) sesuai kebutuhan Anda --}}
-            {{-- </a>
-            <nav>
-                <a href="{{ route('dashboard.public') }}" class="text-gray-600 hover:text-blue-700 font-medium">Kembali ke Dashboard</a>
-            </nav>
-        </div>
-    </header> --}}
-    <header class="bg-white shadow-sm sticky top-0 z-20">
-    <div class="container mx-auto px-6 py-4 flex items-center justify-between">
+    <header class="bg-dark-card border-b border-dark-border px-6 py-4 flex justify-between items-center sticky top-0 z-20">
         <a href="{{ route('dashboard.public') }}">
-            <img src="{{ asset('img/navbar.png') }}" alt="Logo Indeks Inklusi" class="h-10">
+            <img src="{{ asset('img/navbar.png') }}" class="h-10" alt="Logo Indeks Inklusi" />
         </a>
-
-        <div class="flex items-center gap-4">
-            {{-- Tombol kembali ke dashboard --}}
-            <a href="{{ route('dashboard.public') }}"
-               class="text-gray-600 hover:text-blue-700 font-medium">
-                Kembali ke Dashboard
-            </a>
-
-            {{-- Tombol ganti versi peta --}}
+        <nav>
+            <a href="{{ route('dashboard.public') }}" class="text-accent-500 hover:underline font-semibold">Kembali ke Dashboard</a>
             @php
                 $currentRoute = request()->route()->getName();
                 $isMap1 = $currentRoute === 'map.public';
@@ -101,106 +100,66 @@
                       bg-blue-500 text-white hover:bg-blue-600">
                 {{ $targetMapLabel }}
             </a>
-        </div>
-    </div>
-</header>
-
+        </nav>
+    </header>
 
     <main class="py-12">
         <section id="peta-lokasi" class="container mx-auto px-6">
-            <div>
-                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8 text-center sm:text-left">
-                    <div>
-                        <h2 class="text-4xl font-extrabold text-gray-800 tracking-tight mb-2">Peta Sebaran Inklusi</h2>
-                        <p class="text-lg text-gray-500 max-w-3xl">
-                            Jelajahi peta interaktif untuk melihat peringkat fasilitas publik yang telah terverifikasi.
-                        </p>
-                    </div>
-                    <div class="mt-4 sm:mt-0">
-                        <button onclick="forceMapRefresh()" title="Paksa muat ulang data lokasi dari server"
-                                class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 shadow-sm transition-transform hover:scale-105">
-                            <i class="fas fa-sync-alt mr-2"></i>
-                            Refresh Data Peta
-                        </button>
-                    </div>
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8 text-center sm:text-left">
+                <div>
+                    <h2 class="text-4xl font-extrabold text-white tracking-tight mb-2">Peta Sebaran Inklusi</h2>
+                    <p class="text-lg text-white/80 max-w-3xl">
+                        Jelajahi peta interaktif untuk melihat peringkat fasilitas publik yang telah terverifikasi.
+                    </p>
                 </div>
-
-                <div id="map-container">
-                    <div id="loading-overlay">
-                        <div class="spinner"></div>
-                        <p class="mt-4 font-semibold text-gray-700 text-lg">Memproses data lokasi...</p>
-                    </div>
-                    <div id="map"></div>
+                <div class="mt-4 sm:mt-0">
+                    <button onclick="forceMapRefresh()" title="Paksa muat ulang data lokasi dari server"
+                            class="inline-flex items-center px-5 py-2.5 bg-white hover:bg-gray-100 text-primary-700 rounded-lg font-bold transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
+                        <i class="fas fa-sync-alt mr-2"></i>
+                        Refresh Data
+                    </button>
                 </div>
             </div>
-            <div class="mt-8 bg-white rounded-xl shadow-lg p-6">
-                    <div class="mt-8 bg-white rounded-xl shadow-lg p-6">
-                        <h3 class="text-lg font-bold text-gray-800 mb-4">Legenda Peringkat</h3>
-                        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-x-4 gap-y-5">
-                            
-                            <div class="flex items-center space-x-3">
-                                <div class="flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center bg-sky-500">
-                                    <i class="fas fa-gem text-white"></i>
-                                </div>
-                                <div>
-                                    <p class="font-semibold text-gray-700">Diamond</p>
-                                    {{-- Teks Diubah --}}
-                                    <p class="text-xs text-gray-500">Skor &ge; 90</p>
-                                </div>
-                            </div>
 
-                            <div class="flex items-center space-x-3">
-                                <div class="flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center bg-amber-500">
-                                    <i class="fas fa-medal text-white"></i>
-                                </div>
-                                <div>
-                                    <p class="font-semibold text-gray-700">Gold</p>
-                                    {{-- Teks Diubah --}}
-                                    <p class="text-xs text-gray-500">75 - 89.9</p>
-                                </div>
-                            </div>
-
-                            <div class="flex items-center space-x-3">
-                                <div class="flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center bg-slate-500">
-                                    <i class="fas fa-award text-white"></i>
-                                </div>
-                                <div>
-                                    <p class="font-semibold text-gray-700">Silver</p>
-                                    {{-- Teks Diubah --}}
-                                    <p class="text-xs text-gray-500">50 - 74.9</p>
-                                </div>
-                            </div>
-
-                            <div class="flex items-center space-x-3">
-                                <div class="flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center bg-amber-800">
-                                    <i class="fas fa-ribbon text-white"></i>
-                                </div>
-                                <div>
-                                    <p class="font-semibold text-gray-700">Bronze</p>
-                                    {{-- Teks Diubah --}}
-                                    <p class="text-xs text-gray-500">25 - 49.9</p>
-                                </div>
-                            </div>
-
-                            <div class="flex items-center space-x-3">
-                                <div class="flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center bg-red-500">
-                                    <i class="fas fa-certificate text-white"></i>
-                                </div>
-                                <div>
-                                    <p class="font-semibold text-gray-700">Participant</p>
-                                    {{-- Teks Diubah --}}
-                                    <p class="text-xs text-gray-500">&lt; 25</p>
-                                </div>
-                            </div>
-
-                        </div>
+            <div id="map-container">
+                <div id="loading-overlay">
+                    <div class="spinner"></div>
+                    <p class="mt-4 font-semibold text-white/90 text-lg">Memproses data lokasi...</p>
+                </div>
+                <div id="map"></div>
+            </div>
+            
+            <div class="mt-12 bg-dark-card p-8 rounded-2xl shadow-xl border border-dark-border">
+                <h3 class="text-xl font-bold text-white mb-6">Legenda Peringkat</h3>
+                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 text-sm text-white">
+                    <div class="flex items-center gap-2 bg-blue-600/20 p-3 rounded-lg border border-blue-600">
+                        <div class="w-3 h-3 bg-blue-400 rounded-full"></div>
+                        <span class="font-semibold">Diamond</span><span class="text-gray-400 ml-auto">≥ 90</span>
                     </div>
+                    <div class="flex items-center gap-2 bg-yellow-500/20 p-3 rounded-lg border border-yellow-400">
+                        <div class="w-3 h-3 bg-yellow-300 rounded-full"></div>
+                        <span class="font-semibold">Gold</span><span class="text-gray-300 ml-auto">75–89.9</span>
+                    </div>
+                    <div class="flex items-center gap-2 bg-gray-400/20 p-3 rounded-lg border border-gray-300">
+                        <div class="w-3 h-3 bg-gray-200 rounded-full"></div>
+                        <span class="font-semibold">Silver</span><span class="text-gray-300 ml-auto">50–74.9</span>
+                    </div>
+                    <div class="flex items-center gap-2 bg-amber-600/20 p-3 rounded-lg border border-amber-500">
+                        <div class="w-3 h-3 bg-amber-400 rounded-full"></div>
+                        <span class="font-semibold">Bronze</span><span class="text-gray-300 ml-auto">25–49.9</span>
+                    </div>
+                    <div class="flex items-center gap-2 bg-red-600/20 p-3 rounded-lg border border-red-500">
+                        <div class="w-3 h-3 bg-red-400 rounded-full"></div>
+                        <span class="font-semibold">Participant</span><span class="text-gray-300 ml-auto">&lt; 25</span>
+                    </div>
+                </div>
+            </div>
         </section>
     </main>
 
-    <footer class="bg-white border-t border-gray-100 mt-12">
+    <footer class="bg-dark-card border-t border-dark-border mt-12">
         <div class="container mx-auto px-6 py-8 text-center">
-            <p class="text-gray-500 text-sm">&copy; {{ date('Y') }} Indeks Inklusi. Semua hak cipta dilindungi.</p>
+            <p class="text-gray-500 text-sm">&copy; {{ date('Y') }} Indeks Inklusi. Hak cipta dilindungi.</p>
         </div>
     </footer>
 

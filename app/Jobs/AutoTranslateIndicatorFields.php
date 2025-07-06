@@ -100,16 +100,16 @@ class AutoTranslateIndicatorFields implements ShouldQueue
         $this->indicator->save();
 
         Notification::make()
-            ->title('✅ Terjemahan Otomatis Selesai')
-            ->body("Penerjemahan untuk indikator '{$sourceTextForNotification}' berhasil.")
+            ->title(__('✅ Terjemahan Otomatis Selesai'))
+            ->body(__('Penerjemahan untuk indikator \':indicator\' berhasil.', ['indicator' => $sourceTextForNotification]))
             ->success()
             ->sendToDatabase($this->admin);
 
     } catch (\Exception $e) {
         Log::error("❌ Error di AutoTranslate Job: " . $e->getMessage());
         Notification::make()
-            ->title('❌ Terjemahan Otomatis Gagal')
-            ->body("Terjadi kesalahan saat auto-translate. Silakan cek log.")
+            ->title(__('❌ Terjemahan Otomatis Gagal'))
+            ->body(__('Terjadi kesalahan saat auto-translate. Silakan cek log.'))
             ->danger()
             ->sendToDatabase($this->admin);
      }

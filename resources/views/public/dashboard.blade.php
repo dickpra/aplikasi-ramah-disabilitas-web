@@ -58,12 +58,27 @@
         {{-- Main Content --}}
         <div class="flex-1 overflow-auto">
             {{-- Top Navigation --}}
-            <header class="bg-white shadow-sm">
-                <div class="flex items-center justify-between px-6 py-4">
-                    {{-- Mengganti h1 dengan tag img --}}
-                    <img src="{{ asset('img/navbar.png') }}" alt="Logo Penilaian Ramah Disabilitas" class="h-10"> {{-- Sesuaikan tinggi (h-10) sesuai kebutuhan Anda --}}
-                </div>
-            </header>
+            <header class="bg-white dark:bg-dark-card shadow-sm border-b border-gray-200 dark:border-dark-border">
+            <div class="flex items-center justify-between px-6 py-4">
+                {{-- Logo --}}
+                <img src="{{ asset('img/navbar.png') }}" alt="Logo Penilaian Ramah Disabilitas" class="h-10">
+
+                {{-- Tombol Ganti Versi --}}
+                @php
+                    $currentRoute = request()->route()->getName();
+                    $isVersion1 = $currentRoute === 'dashboard.public';
+                    $targetRoute = $isVersion1 ? route('dashboard.public2') : route('dashboard.public');
+                    $targetLabel = $isVersion1 ? 'Versi UI 2' : 'Versi UI 1';
+                @endphp
+
+                <a href="{{ $targetRoute }}"
+                class="px-4 py-2 rounded-md text-sm font-semibold transition-all duration-300
+                        bg-accent-500 text-dark-bg hover:bg-accent-600 dark:bg-white dark:text-primary-700 dark:hover:bg-gray-100">
+                    {{ $targetLabel }}
+                </a>
+            </div>
+        </header>
+
 
             <main class="p-6">
                 {{-- Banner Selamat Datang dengan Tombol Peta --}}

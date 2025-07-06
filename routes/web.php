@@ -23,7 +23,7 @@ use App\Http\Controllers\PublicDashboardController;
 
 // Rute untuk halaman dasbor utama
 Route::get('/', [PublicDashboardController::class, 'dashboard'])->name('dashboard.public');
-
+Route::get('/2', [PublicDashboardController::class, 'dashboard2'])->name('dashboard.public2');
 // Rute untuk halaman peta
 Route::get('/peta-lokasi', [PublicDashboardController::class, 'map'])->name('map.public');
 

@@ -26,6 +26,22 @@ class PublicDashboardController extends Controller
             'locations' => $locations,
         ]);
     }
+    public function dashboard2()
+    {
+        // =================================================================
+        // FIX: Tambahkan logika ini untuk mengambil data $locations
+        // dan mengirimkannya ke view 'public.dashboard'.
+        // =================================================================
+        $locations = Location::query()
+            ->whereNotNull('final_score')
+            ->with('province.country') // Eager load provinsi
+            ->orderBy('final_score', 'desc')
+            ->paginate(10); // Gunakan paginate() karena view Anda memiliki {{ $locations->links() }}
+
+        return view('public.dashboard2', [
+            'locations' => $locations,
+        ]);
+    }
 
     /**
      * Menampilkan halaman peta lokasi.

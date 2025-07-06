@@ -136,14 +136,14 @@
       <div class="w-24 h-1 bg-accent-500 mx-auto"></div>
     </div>
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-      <div class="bg-dark-card p-8 rounded-2xl shadow-lg border border-dark-border card-hover">
+      <div class="bg-dark-card p-6 rounded-xl shadow hover:shadow-lg border border-dark-border">
         <div class="flex items-center gap-4">
           <div class="p-3 bg-primary-500 text-white rounded-full shadow-md">
             <i class="fas fa-building text-xl"></i>
           </div>
           <div>
-            <p class="text-sm text-gray-300 uppercase tracking-wider">Lokasi Terdaftar</p>
-            <h3 class="text-2xl font-bold text-white">{{ \App\Models\Location::count() }}</h3>
+            <p class="text-sm text-gray-400">Lokasi Terdaftar</p>
+            <h2 class="text-2xl font-bold text-white">{{ \App\Models\Location::count() }}</h2>
           </div>
         </div>
       </div>
@@ -211,11 +211,12 @@
         <span class="font-semibold">Silver</span>
         <span class="text-gray-300 ml-auto">50–74.9</span>
       </div>
-      <div class="flex items-center gap-2 bg-amber-600/20 p-3 rounded-lg border border-amber-500">
-        <div class="w-3 h-3 bg-amber-400 rounded-full"></div>
+     <div class="flex items-center gap-2 bg-orange-500/20 p-3 rounded-lg border border-orange-500">
+        <div class="w-3 h-3 bg-orange-400 rounded-full"></div>
         <span class="font-semibold">Bronze</span>
         <span class="text-gray-300 ml-auto">25–49.9</span>
       </div>
+
       <div class="flex items-center gap-2 bg-red-600/20 p-3 rounded-lg border border-red-500">
         <div class="w-3 h-3 bg-red-400 rounded-full"></div>
         <span class="font-semibold">Participant</span>
@@ -239,7 +240,7 @@
                 $color = 'bg-gray-300 text-gray-900';
             } elseif ($score >= 25) {
                 $rank = 'Bronze';
-                $color = 'bg-amber-600 text-white';
+                $color = 'bg-orange-500 text-white';
             } else {
                 $rank = 'Participant';
                 $color = 'bg-red-600 text-white';
@@ -296,14 +297,24 @@
       </div>
       <div>
         <h3 class="text-lg font-semibold mb-4">Hubungi Kami</h3>
-        <div class="flex items-center gap-3 text-gray-400 mb-2">
+        {{-- <div class="flex items-center gap-3 text-gray-400 mb-2">
           <i class="fas fa-envelope"></i>
           <span>info@indeksinklusi.id</span>
         </div>
         <div class="flex items-center gap-3 text-gray-400">
           <i class="fas fa-phone-alt"></i>
           <span>+62 123 4567 890</span>
-        </div>
+        </div> --}}
+        <ul class="space-y-2">
+          <li><div class="text-gray-400 mb-2">
+            <i class="fas fa-envelope"></i>
+            <span>info@indeksinklusi.id</span>
+          </div></li>
+          <li><div class="text-gray-400">
+            <i class="fas fa-phone-alt"></i>
+            <span>+62 123 4567 890</span>
+          </div></li>
+        </ul>
       </div>
     </div>
     <div class="max-w-7xl mx-auto border-t border-dark-border mt-12 pt-8 text-center text-gray-500">

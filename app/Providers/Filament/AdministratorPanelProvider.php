@@ -44,7 +44,8 @@ class AdministratorPanelProvider extends PanelProvider
             // ->login()
             ->registration()
             ->colors([
-                'primary' => Color::Amber,
+                'primary' => Color::Amber, // Hijau soft, mirip aksen ChatGPT
+                'gray' => Color::Gray,    // Warna abu soft, mirip #343541
             ])
             ->databaseNotifications()
             ->databaseNotificationsPolling('3s')

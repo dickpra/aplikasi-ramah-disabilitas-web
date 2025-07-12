@@ -52,7 +52,7 @@ class UnifiedLoginController extends Controller
             throw ValidationException::withMessages([
                 'data.email' => __('Akun Anda sedang menunggu persetujuan admin'),
             ]);
-        }if (!$assessor || $assessor->status == 'rejected') {
+        }if ($assessor && $assessor->status == 'rejected') {
             // Jika tidak, atau jika asesornya sudah 'approved', maka kita melanjutkan ke proses
             // pengecekan password.
             throw ValidationException::withMessages([

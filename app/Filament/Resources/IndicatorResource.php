@@ -190,7 +190,7 @@ class IndicatorResource extends Resource
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(),
-                Tables\Actions\EditAction::make(),
+                // Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(), // Tambahkan jika perlu, atau custom action untuk Nonaktifkan
            Tables\Actions\EditAction::make(),
                 Action::make('auto_translate')

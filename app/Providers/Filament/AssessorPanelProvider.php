@@ -40,9 +40,11 @@ class AssessorPanelProvider extends PanelProvider
                 \App\Filament\Assessor\Pages\Auth\Register::class
 
             )
-            ->colors([
-                'primary' => Color::Amber,
+           ->colors([
+                'primary' => Color::Amber, // Warna utama Anda
+                'gray' => Color::Slate,   // <-- Ubah palet warna abu-abu standar
             ])
+            // ->darkMode(true) 
             ->discoverResources(in: app_path('Filament/Assessor/Resources'), for: 'App\\Filament\\Assessor\\Resources')
             ->discoverPages(in: app_path('Filament/Assessor/Pages'), for: 'App\\Filament\\Assessor\\Pages')
             ->pages([

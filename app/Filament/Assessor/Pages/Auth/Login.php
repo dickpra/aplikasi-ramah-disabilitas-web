@@ -27,7 +27,7 @@ class Login extends BaseLogin
         throw ValidationException::withMessages([
             'data.email' => __('Akun tidak ditemukan'),
         ]);
-    }
+        }
         // Pengecekan 1: Apakah asesornya ada? DAN apakah statusnya BUKAN 'approved'?
         if ($assessor && $assessor->status == 'pending') {
             // Jika ya, langsung lemparkan pesan error spesifik kita.

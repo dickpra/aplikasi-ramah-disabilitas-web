@@ -32,10 +32,10 @@ class AssessorPanelProvider extends PanelProvider
             ->brandName('Assessor Panel')
             ->id('assessor')
             ->path('assessor')
-            ->login(
-                // AssessorLogin::class
-                \App\Filament\Assessor\Pages\Auth\Login::class
-            )
+            // ->login(
+            //     // AssessorLogin::class
+            //     \App\Filament\Assessor\Pages\Auth\Login::class
+            // )
             ->registration(
                 \App\Filament\Assessor\Pages\Auth\Register::class
 

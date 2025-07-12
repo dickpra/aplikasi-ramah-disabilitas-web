@@ -71,6 +71,12 @@
       background-clip: text;
       color: transparent;
     }
+    .gradient-text-light {
+      background: linear-gradient(90deg, #74d618 0%, #2e9adc 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
     .card-hover {
       transition: all 0.3s ease;
     }
@@ -105,20 +111,20 @@
     <div class="relative max-w-5xl mx-auto animate-fade-in">
       <h1 class="text-4xl sm:text-5xl md:text-6xl font-bold mb-6 leading-tight">
         Selamat Datang di <br>
-        <span class="gradient-text">UMIX</span>
+        <span class="dark:gradient-text2 gradient-text-light">UMIX</span>
       </h1>
       <p class="text-lg sm:text-xl md:text-2xl text-gray-800 dark:text-white/90 max-w-3xl mx-auto mb-10">
         Menilai tingkat aksesibilitas lokasi publik untuk penyandang disabilitas. 
         <span class="block mt-2 font-medium">Mari ciptakan dunia yang lebih inklusif!</span>
       </p>
       <div class="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6">
-        <a href="{{ url(config('filament.panels.administrator.path', '/administrator/login')) }}"
+        {{-- <a href="{{ url(config('filament.panels.administrator.path', '/administrator/login')) }}"
           class="w-full sm:w-auto px-8 py-4 bg-accent-500 hover:bg-accent-600 text-dark-bg rounded-xl font-bold transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1">
           <span class="relative z-10">Login Admin</span>
-        </a>
-        <a href="{{ url(config('filament.panels.assessor.path', '/assessor/login')) }}"
-          class="w-full sm:w-auto px-8 py-4 bg-white hover:bg-gray-100 text-primary-700 rounded-xl font-bold transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1">
-          <span class="relative z-10">Login Asesor</span>
+        </a> --}}
+        <a href="{{ url('/login') }}"
+          class="dark:bg-accent-500 w-full sm:w-auto px-8 py-4 bg-white hover:bg-gray-100 text-primary-700 rounded-xl font-bold transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1">
+          <span class="relative z-10">Login</span>
         </a>
       </div>
     </div>

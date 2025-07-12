@@ -2,6 +2,8 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PublicDashboardController;
+use App\Http\Controllers\Auth\UnifiedLoginController; // <-- Import
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -28,4 +30,8 @@ Route::get('/', [PublicDashboardController::class, 'dashboard'])->name('dashboar
 Route::get('/peta-lokasi', [PublicDashboardController::class, 'map'])->name('map.public');
 // Route::get('/peta-lokasi-2', [PublicDashboardController::class, 'map2'])->name('map.public2');
 
-
+// Route untuk menampilkan halaman login
+Route::middleware('filamentcustomlogin')->group(function () {
+    Route::get('/login', [UnifiedLoginController::class, 'create'])->name('login');
+    Route::post('/login', [UnifiedLoginController::class, 'store'])->name('login.authenticate');
+});

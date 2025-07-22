@@ -250,7 +250,7 @@
     </div>
   </section>
 
-  <footer class="bg-white dark:bg-dark-card border-t border-gray-200 dark:border-dark-border py-12 px-4 sm:px-6">
+  <footer class="bg-white dark:bg-dark-card border-t border-gray-200 dark:border-dark-border py-5 px-4 sm:px-6">
     <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 text-center md:text-left">
       <div class="flex flex-col items-center md:items-start">
         <img src="{{ asset('img/navbar.png') }}" class="h-12 mb-4" alt="Logo" />
@@ -272,7 +272,7 @@
         </ul>
       </div>
     </div>
-    <div class="max-w-7xl mx-auto border-t border-gray-200 dark:border-dark-border mt-8 pt-8 text-center text-gray-500 dark:text-gray-400">
+    <div class="max-w-7xl mx-auto border-t border-gray-200 dark:border-dark-border mt-5 pt-5 text-center text-gray-500 dark:text-gray-400">
       <p>&copy; {{ date('Y') }} UMIX. All rights reserved.</p>
     </div>
   </footer>

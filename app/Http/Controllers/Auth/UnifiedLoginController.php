@@ -35,8 +35,8 @@ class UnifiedLoginController extends Controller
         if (Auth::guard('admin')->attempt($credentials)) {
             $request->session()->regenerate();
             
-            // Jika berhasil, arahkan ke path panel admin secara dinamis
-            return redirect()->intended(config('filament.panels.administrator.path'));
+            // Berikan path panel admin sebagai fallback
+            return redirect()->intended(config('filament.panels.administrator.path', '/administrator'));
         }
 
         // 2. Jika gagal sebagai admin, cek dulu apakah user ini adalah asesor yang belum disetujui
@@ -64,8 +64,8 @@ class UnifiedLoginController extends Controller
         if (Auth::guard('assessor')->attempt($credentials)) {
             $request->session()->regenerate();
 
-            // Jika berhasil, arahkan ke path panel asesor secara dinamis
-            return redirect()->intended(config('filament.panels.assessor.path'));
+            // Berikan path panel asesor sebagai fallback
+            return redirect()->intended(config('filament.panels.assessor.path', '/assessor'));
         }
 
         // 4. Jika semua upaya gagal, lemparkan error kredensial standar

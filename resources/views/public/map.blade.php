@@ -70,7 +70,10 @@
 
     <header class="bg-light-card dark:bg-dark-card border-b border-light-border dark:border-dark-border px-4 sm:px-6 py-4 flex justify-between items-center sticky top-0 z-20 transition-colors">
         <a href="{{ route('dashboard.public') }}">
-            <img src="{{ asset('img/navbar.png') }}" class="h-10" alt="Logo Indeks Inklusi" />
+            <!--<img src="{{ asset('img/navbar.png') }}" class="h-10" alt="Logo Indeks Inklusi" />-->
+            <div class="text-2xl font-bold text-primary-700 dark:text-accent-500">
+              UMIX
+            </div>
         </a>
         <nav class="flex items-center space-x-4">
             <a href="{{ route('dashboard.public') }}" class="text-primary-500 dark:text-accent-500 hover:underline font-semibold text-sm sm:text-base">Kembali ke Dashboard</a>
@@ -139,7 +142,8 @@
 
     <footer class="bg-light-card dark:bg-dark-card border-t border-light-border dark:border-dark-border mt-12 transition-colors">
         <div class="container mx-auto px-6 py-8 text-center">
-            <p class="text-gray-500 dark:text-gray-400 text-sm">&copy; {{ date('Y') }} UMIX. Hak cipta dilindungi.</p>
+            <p class="text-gray-500 dark:text-gray-400 text-sm">
+                &copy; {{ date('Y') }} UMIX. All rights reserved.
         </div>
     </footer>
 

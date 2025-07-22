@@ -89,18 +89,23 @@
 
 <body class="bg-white text-gray-900 dark:bg-dark-bg dark:text-white">
 
-  <header class="bg-white dark:bg-dark-card border-b border-gray-200 dark:border-dark-border px-4 sm:px-6 py-4">
-    <div class="container mx-auto flex flex-wrap justify-between items-center">
-      <img src="{{ asset('img/navbar.png') }}" class="h-10" alt="Logo" />
-      <nav class="space-x-2 sm:space-x-4 flex items-center mt-4 sm:mt-0">
-        <a href="{{ route('map.public') }}" class="text-primary-700 dark:text-accent-500 hover:underline font-semibold text-sm sm:text-base">Peta Persebaran</a>
-        
-        <button onclick="toggleTheme()" class="text-sm font-medium px-3 py-2 rounded-md bg-gray-100 dark:bg-dark-card dark:text-white border dark:border-dark-border transition">
-          <span id="themeToggleText">🌙 Dark</span>
-        </button>
-      </nav>
-    </div>
-  </header>
+    <header class="bg-light-card dark:bg-dark-card border-b border-light-border dark:border-dark-border px-4 sm:px-6 py-4 flex justify-between items-center top-0 z-20 transition-colors">
+            <a href="{{ route('dashboard.public') }}">
+                <div class="text-2xl font-bold text-primary-700 dark:text-accent-500">
+                  UMIX
+                </div>
+            </a>
+            <nav class="flex items-center space-x-2">
+                <a href="{{ route('map.public') }}" class="text-primary-700 dark:text-accent-500 hover:underline font-semibold text-sm sm:text-base">
+                    Peta Persebaran
+                  </a>
+                
+                {{-- Tombol Pengalih Tema --}}
+                      <button onclick="toggleTheme()" class="text-sm font-medium px-3 py-2 rounded-md bg-gray-100 dark:bg-dark-card dark:text-white border dark:border-dark-border transition">
+        <span id="themeToggleText">🌙 Dark</span>
+      </button>
+            </nav>
+        </header>
 
   <section class="relative bg-gradient-to-br from-blue-100 via-indigo-200 to-purple-200 dark:from-primary-900 dark:via-primary-700 dark:to-primary-500 py-20 sm:py-24 px-4 sm:px-6 text-center overflow-hidden">
     <div class="absolute inset-0 opacity-10">
@@ -124,7 +129,7 @@
         </a> --}}
         <a href="{{ url('/login') }}"
           class="dark:bg-accent-500 w-full sm:w-auto px-8 py-4 bg-white hover:bg-gray-100 text-primary-700 rounded-xl font-bold transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1">
-          <span class="relative z-10">Login</span>
+          <span class="relative z-10">Masuk</span>
         </a>
       </div>
     </div>
@@ -253,7 +258,10 @@
   <footer class="bg-white dark:bg-dark-card border-t border-gray-200 dark:border-dark-border py-5 px-4 sm:px-6">
     <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 text-center md:text-left">
       <div class="flex flex-col items-center md:items-start">
-        <img src="{{ asset('img/navbar.png') }}" class="h-12 mb-4" alt="Logo" />
+        <!--<img src="{{ asset('img/navbar.png') }}" class="h-12 mb-4" alt="Logo" />-->
+        <div class="text-2xl font-bold text-primary-700 dark:text-accent-500">
+          UMIX
+        </div>
         <p class="text-gray-600 dark:text-gray-400">Membangun masyarakat inklusif melalui aksesibilitas yang setara.</p>
       </div>
       <div>

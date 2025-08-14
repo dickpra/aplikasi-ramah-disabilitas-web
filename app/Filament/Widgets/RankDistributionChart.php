@@ -29,7 +29,7 @@ class RankDistributionChart extends ChartWidget
             ->map(fn ($location) => $location->final_assessment['rank'] ?? 'N/A')
             ->countBy();
 
-        $allRanks = ['DIAMOND', 'GOLD', 'SILVER', 'BRONZE', 'PARTICIPANT', 'N/A'];
+        $allRanks = ['DIAMOND', 'GOLD', 'SILVER', 'BRONZE', 'N/A'];
         $data = [];
         $labels = [];
 
@@ -48,7 +48,7 @@ class RankDistributionChart extends ChartWidget
                         'rgba(75, 192, 192, 0.5)', // GOLD (hijau)
                         'rgba(255, 206, 86, 0.5)', // SILVER (kuning)
                         'rgba(201, 203, 207, 0.5)', // BRONZE (abu-abu)
-                        'rgba(255, 99, 132, 0.5)',  // PARTICIPANT (merah)
+                        // 'rgba(255, 99, 132, 0.5)',  // PARTICIPANT (merah)
                         'rgba(153, 102, 255, 0.5)',// N/A (ungu)
                     ],
                     'borderColor' => [

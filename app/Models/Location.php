@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Casts\Attribute; // Penting untuk accessor
+use Illuminate\Database\Eloquent\Relations\HasManyThrough; // <-- 1. Import HasManyThrough
 
 
 
@@ -122,7 +123,7 @@ class Location extends Model
         if ($percentage >= 75) return 'GOLD';
         if ($percentage >= 50) return 'SILVER';
         if ($percentage >= 25) return 'BRONZE';
-        return 'PARTICIPANT';
+        return 'N/A';
     }
 
     // Accessor bisa disesuaikan untuk memanggil metode baru ini
@@ -131,6 +132,13 @@ class Location extends Model
         return Attribute::make(
             get: fn () => $this->calculateFinalScore(),
         );
+    }
+
+    public function assessmentScores(): HasManyThrough
+    {
+        // Parameter 1: Model tujuan akhir (AssessmentScore)
+        // Parameter 2: Model perantara (Assignment)
+        return $this->hasManyThrough(AssessmentScore::class, Assignment::class);
     }
 
 //     /**

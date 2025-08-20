@@ -295,36 +295,46 @@
 
   <!-- Contoh untuk About -->
 <section id="about" class="scroll-mt-20 max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-20">
-  <div class="text-center mb-12">
-    <div class="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-primary-500 to-accent-500 text-white rounded-full shadow-lg animate-float">
-      <i class="fas fa-info-circle text-2xl"></i>
+    <div class="text-center mb-12">
+        <div class="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-primary-500 to-accent-500 text-white rounded-full shadow-lg animate-float">
+            <i class="fas fa-info-circle text-2xl"></i>
+        </div>
+        <h2 class="mt-6 text-3xl sm:text-4xl font-extrabold gradient-text">{{ __('Tentang Kami') }}</h2>
+        <p class="mt-2 text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">{{ __('Kenali latar belakang dan tujuan dari platform ini.') }}</p>
     </div>
-    <h2 class="mt-6 text-3xl sm:text-4xl font-extrabold gradient-text">{{ __('Tentang Kami') }}</h2>
-    <p class="mt-2 text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">{{ __('Kenali latar belakang dan tujuan dari platform ini.') }}</p>
-  </div>
-  <div class="backdrop-blur-lg bg-white/70 dark:bg-dark-card/60 rounded-2xl p-8 shadow-xl border border-gray-200 dark:border-dark-border card-hover">
-    <div class="prose dark:prose-invert max-w-none text-lg leading-relaxed">
-      {!! $settings?->about_me !!}
+    <div class="backdrop-blur-lg bg-white/70 dark:bg-dark-card/60 rounded-2xl p-8 shadow-xl border border-gray-200 dark:border-dark-border card-hover">
+        {{-- ==== KODE BARU UNTUK MERENDER BUILDER ==== --}}
+        <div class="space-y-6">
+            @if(is_array($settings?->about_me))
+                @foreach($settings->about_me as $block)
+                    @include('public.partials._builder-block', ['block' => $block])
+                @endforeach
+            @endif
+        </div>
     </div>
-  </div>
 </section>
 
 <!-- Contoh untuk Credit -->
 <section id="credit" class="scroll-mt-20 max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-20">
-  <div class="text-center mb-12">
-    <div class="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-emerald-500 to-teal-500 text-white rounded-full shadow-lg animate-float">
-      <i class="fas fa-hands-helping text-2xl"></i>
+    <div class="text-center mb-12">
+        <div class="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-emerald-500 to-teal-500 text-white rounded-full shadow-lg animate-float">
+            <i class="fas fa-hands-helping text-2xl"></i>
+        </div>
+        <h2 class="mt-6 text-3xl sm:text-4xl font-extrabold gradient-text">{{ __('Kredit') }}</h2>
+        <p class="mt-2 text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">{{ __('Penghargaan untuk pihak yang berkontribusi.') }}</p>
     </div>
-    <h2 class="mt-6 text-3xl sm:text-4xl font-extrabold gradient-text">{{ __('Kredit') }}</h2>
-    <p class="mt-2 text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">{{ __('Penghargaan untuk pihak yang berkontribusi.') }}</p>
-  </div>
-  <div class="backdrop-blur-lg bg-white/70 dark:bg-dark-card/60 rounded-2xl p-8 shadow-xl border border-gray-200 dark:border-dark-border card-hover">
-    <div class="prose dark:prose-invert max-w-none text-lg leading-relaxed">
-      {!! $settings?->credit !!}
+    <div class="backdrop-blur-lg bg-white/70 dark:bg-dark-card/60 rounded-2xl p-8 shadow-xl border border-gray-200 dark:border-dark-border card-hover">
+        <div class="space-y-6">
+            @if(is_array($settings?->credit))
+                @foreach($settings->credit as $block)
+                    @include('public.partials._builder-block', ['block' => $block])
+                @endforeach
+            @endif
+        </div>
     </div>
-  </div>
 </section>
 
+<!-- Contoh untuk Guidebook -->
 <!-- Contoh untuk Guidebook -->
 <section id="guidebook" class="scroll-mt-20 max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-20">
   <div class="text-center mb-12">
@@ -335,8 +345,13 @@
     <p class="mt-2 text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">{{ __('Panduan resmi untuk memahami dan menggunakan platform.') }}</p>
   </div>
   <div class="backdrop-blur-lg bg-white/70 dark:bg-dark-card/60 rounded-2xl p-8 shadow-xl border border-gray-200 dark:border-dark-border card-hover">
-    <div class="prose dark:prose-invert max-w-none text-lg leading-relaxed">
-      {!! $settings?->guidebook !!}
+    {{-- ==== KODE BARU UNTUK MERENDER BUILDER ==== --}}
+    <div class="space-y-6">
+        @if(is_array($settings?->guidebook))
+            @foreach($settings->guidebook as $block)
+                @include('public.partials._builder-block', ['block' => $block])
+            @endforeach
+        @endif
     </div>
   </div>
 </section>
@@ -351,11 +366,17 @@
     <p class="mt-2 text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">{{ __('Cara dan langkah yang digunakan dalam pengukuran Indeks Inklusi.') }}</p>
   </div>
   <div class="backdrop-blur-lg bg-white/70 dark:bg-dark-card/60 rounded-2xl p-8 shadow-xl border border-gray-200 dark:border-dark-border card-hover">
-    <div class="prose dark:prose-invert max-w-none text-lg leading-relaxed">
-      {!! $settings?->metodologi !!}
+    {{-- ==== KODE BARU UNTUK MERENDER BUILDER ==== --}}
+    <div class="space-y-6">
+        @if(is_array($settings?->metodologi))
+            @foreach($settings->metodologi as $block)
+                @include('public.partials._builder-block', ['block' => $block])
+            @endforeach
+        @endif
     </div>
   </div>
 </section>
+
 
 
   <div class="h-16"></div> <!-- Spacer for footer -->

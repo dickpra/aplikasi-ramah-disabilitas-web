@@ -19,4 +19,11 @@ class DashboardSetting extends Model
         'contact_email',
         'contact_phone',
     ];
+
+    protected $casts = [
+        'about_me' => 'array',
+        'credit' => 'array',
+        'guidebook' => 'array',
+        'metodologi' => 'array',
+    ];
 }

@@ -12,7 +12,7 @@
 
         @if($activeLanguage && $activeLanguage->code)
             {{-- Menggunakan sintaks dinamis yang BENAR sesuai dokumentasi --}}
-            <x-icon :name="'flag-country-' . $activeLanguage->code" class="w-6 h-5" />
+            <x-icon name="flag-language-{{ $activeLanguage->code }}" class="w-6 h-5" />
         @endif
         
         <span>{{ strtoupper($currentLocale) }}</span>

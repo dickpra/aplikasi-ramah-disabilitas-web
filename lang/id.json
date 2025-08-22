@@ -286,6 +286,7 @@
     "Terjadi kesalahan saat auto-translate. Silakan cek log.": "Terjadi kesalahan saat auto-translate. Silakan cek log.",
     "Akun Anda sedang menunggu persetujuan admin atau telah ditolak.": "Akun Anda sedang menunggu persetujuan admin atau telah ditolak.",
     "These credentials do not match our records.": "These credentials do not match our records.",
+    "Dashboard": "Dashboard",
     "About Me": "About Me",
     "Credit": "Credit",
     "Guidebook": "Guidebook",
@@ -312,9 +313,6 @@
     "Tautan Cepat": "Tautan Cepat",
     "Peta Persebaran": "Peta Persebaran",
     "Hubungi Kami": "Hubungi Kami",
-    "Dashboard": "Dashboard",
     "Memuat...": "Memuat...",
-    "Gagal memuat": "Gagal memuat",
-    "Pengaturan Tampilan Dashboard": "Pengaturan Tampilan Dashboard",
-    "Universitas/Institut/Kampus": "Universitas/Institut/Kampus"
+    "Gagal memuat": "Gagal memuat"
 }

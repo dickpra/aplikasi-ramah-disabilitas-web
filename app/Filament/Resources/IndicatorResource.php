@@ -176,13 +176,13 @@ class IndicatorResource extends Resource
                     //     'all' => 'Semua Jenis Lokasi',
                     // ])
                     ->options([
-                            'Kota' => 'Kota',
-                            'Kabupaten' => 'Kabupaten',
-                            'Perguruan Tinggi' => 'Perguruan Tinggi',
-                            'Sekolah' => 'Sekolah',
-                            'Ruang Publik' => 'Ruang Publik',
-                            'all' => 'Semua Jenis Lokasi',
-                        ])
+                            'Kota' => (__('Kota')), 
+                            'Kabupaten' => (__('Kabupaten')), 
+                            'Universitas/Institut/Kampus' => (__('Universitas/Institut/Kampus')),
+                            'Sekolah' => (__('Sekolah')), 
+                            'Ruang Publik' => (__('Ruang Publik')),
+                            'all' => (__('Semua Jenis Lokasi')),
+                ])
 
                     ->label(__('Filter Target Lokasi')),
                 Tables\Filters\TernaryFilter::make('is_active')

@@ -22,10 +22,27 @@ class ManageDashboardSettings extends Page implements HasForms
     use InteractsWithForms;
 
     protected static ?string $navigationIcon = 'heroicon-o-cog-6-tooth';
-    protected static ?string $navigationGroup = 'Pengaturan';
     protected static string $view = 'filament.pages.admin.manage-dashboard-settings';
-    protected static ?string $title = 'Pengaturan Tampilan Dashboard';
     protected static ?int $navigationSort = 1;
+
+    // Grup Navigasi
+    public static function getNavigationGroup(): ?string
+    {
+        return __('Pengaturan');
+    }
+
+    // Judul Halaman (title)
+    public static function getPluralModelLabel(): string
+    {
+        return __('Pengaturan Tampilan Dashboard');
+    }
+
+    // Label Navigasi (sidebar)
+    public static function getNavigationLabel(): string
+    {
+        return __('Pengaturan Tampilan Dashboard');
+    }
+    
 
     public ?array $data = [];
     public DashboardSetting $settings;
@@ -88,55 +105,55 @@ class ManageDashboardSettings extends Page implements HasForms
      * Dibuat menjadi metode terpisah agar bisa digunakan kembali.
      */
     protected function getContentBlocks(): array
-{
-    return [
-        Builder\Block::make('heading')
-            ->label('Judul')
-            ->icon('heroicon-o-bookmark')
-            ->schema([
-                TextInput::make('content')->label('Teks Judul')->required(),
-                Select::make('level')->options(['h2' => 'Besar', 'h3' => 'Sedang', 'h4' => 'Kecil'])->default('h2')->required(),
-            ]),
-        Builder\Block::make('paragraph')
-            ->label('Paragraf')
-            ->icon('heroicon-o-bars-3-bottom-left')
-            ->schema([
-                RichEditor::make('content')->label('Konten Paragraf')->required(),
-            ]),
-        Builder\Block::make('image')
-            ->label('Gambar')
-            ->icon('heroicon-o-photo')
-            ->schema([
-                FileUpload::make('url')->label('Upload Gambar')->image()->required(),
-                TextInput::make('alt')->label('Teks Alternatif (untuk SEO)'),
-            ]),
+    {
+        return [
+            Builder\Block::make('heading')
+                ->label('Judul')
+                ->icon('heroicon-o-bookmark')
+                ->schema([
+                    TextInput::make('content')->label('Teks Judul')->required(),
+                    Select::make('level')->options(['h2' => 'Besar', 'h3' => 'Sedang', 'h4' => 'Kecil'])->default('h2')->required(),
+                ]),
+            Builder\Block::make('paragraph')
+                ->label('Paragraf')
+                ->icon('heroicon-o-bars-3-bottom-left')
+                ->schema([
+                    RichEditor::make('content')->label('Konten Paragraf')->required(),
+                ]),
+            Builder\Block::make('image')
+                ->label('Gambar')
+                ->icon('heroicon-o-photo')
+                ->schema([
+                    FileUpload::make('url')->label('Upload Gambar')->image()->required(),
+                    TextInput::make('alt')->label('Teks Alternatif (untuk SEO)'),
+                ]),
 
-            Builder\Block::make('pdf_document')
-            ->label('Dokumen PDF')
-            ->icon('heroicon-o-document-text')
-            ->schema([
-                FileUpload::make('url')
-                    ->label('Upload PDF')
-                    ->acceptedFileTypes(['application/pdf']) // Hanya izinkan PDF
-                    ->required(),
-                TextInput::make('height')
-                    ->label('Tinggi Tampilan (opsional)')
-                    ->default('800px')
-                    ->helperText('Contoh: 800px atau 100%'),
-            ]),
-        
-        // ==== BLOK BARU YANG PINTAR UNTUK SEMUA EMBED ====
-        Builder\Block::make('smart_embed')
-            ->label('Embed Cerdas (YouTube, GDrive, Canva)')
-            ->icon('heroicon-o-link')
-            ->schema([
-                TextInput::make('url')
-                    ->label('URL (YouTube, Google Drive, Canva, dll.)')
-                    ->helperText('Cukup tempelkan link "share" dari layanan yang Anda inginkan. Sistem akan mengubahnya secara otomatis.')
-                    ->required(),
-            ]),
-    ];
-}
+                Builder\Block::make('pdf_document')
+                ->label('Dokumen PDF')
+                ->icon('heroicon-o-document-text')
+                ->schema([
+                    FileUpload::make('url')
+                        ->label('Upload PDF')
+                        ->acceptedFileTypes(['application/pdf']) // Hanya izinkan PDF
+                        ->required(),
+                    TextInput::make('height')
+                        ->label('Tinggi Tampilan (opsional)')
+                        ->default('800px')
+                        ->helperText('Contoh: 800px atau 100%'),
+                ]),
+            
+            // ==== BLOK BARU YANG PINTAR UNTUK SEMUA EMBED ====
+            Builder\Block::make('smart_embed')
+                ->label('Embed Cerdas (YouTube, GDrive, Canva)')
+                ->icon('heroicon-o-link')
+                ->schema([
+                    TextInput::make('url')
+                        ->label('URL (YouTube, Google Drive, Canva, dll.)')
+                        ->helperText('Cukup tempelkan link "share" dari layanan yang Anda inginkan. Sistem akan mengubahnya secara otomatis.')
+                        ->required(),
+                ]),
+        ];
+    }
 
     public function save(): void
     {

@@ -66,7 +66,7 @@ class LocationResource extends Resource
                 ->options([
                     'Kota' => (__('Kota')), 
                     'Kabupaten' => (__('Kabupaten')), 
-                    'Perguruan Tinggi' => (__('Perguruan Tinggi')),
+                    'Perguruan Tinggi' => (__('Universitas/Institut/Kampus')),
                     'Sekolah' => (__('Sekolah')), 
                     'Ruang Publik' => (__('Ruang Publik')),
                 ])

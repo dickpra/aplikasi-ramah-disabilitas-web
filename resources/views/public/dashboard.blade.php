@@ -243,7 +243,7 @@
                       <option value="">{{ __('Semua Tipe') }}</option>
                       @foreach($locationTypes as $type)
                           <option value="{{ $type }}" @selected(request('location_type') == $type)>
-                              {{ $type }}
+                              {{ __($type) }}
                           </option>
                       @endforeach
                   </select>

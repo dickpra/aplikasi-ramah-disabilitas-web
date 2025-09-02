@@ -15,7 +15,6 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Models\Location;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Resources\Concerns\Translatable; // <-- 1. Pastikan Trait Resource di-import
-
 use App\Jobs\AutoTranslateIndicatorFields;
 use Filament\Tables\Actions\Action;
 use Filament\Notifications\Notification;
@@ -66,24 +65,31 @@ class IndicatorResource extends Resource
                             ->helperText(__('Contoh: Dukungan Pemerintah, Pendidikan, Infrastruktur.'))
                             ->maxLength(255),
                         Forms\Components\Select::make('target_location_type')
+                            ->required()
                             ->label(__('Target Jenis Lokasi'))
                             ->options(function (): array {
                                 // Ambil semua nilai unik dari kolom 'location_type' di tabel 'locations'
                                 $locationTypes = Location::query()
                                     ->select('location_type')
-                                    ->whereNotNull('location_type') // Hanya ambil yang tidak null
-                                    ->where('location_type', '!=', '') // Hanya ambil yang tidak string kosong
+                                    ->whereNotNull('location_type')
+                                    ->where('location_type', '!=', '')
                                     ->distinct()
-                                    ->pluck('location_type', 'location_type') // Gunakan location_type sebagai key dan value
+                                    ->pluck('location_type')
                                     ->all();
-                                
-                                // Tambahkan opsi 'all' secara manual jika selalu diperlukan
-                                $locationTypes['all'] = __('Semua Jenis Lokasi (all)');
 
-                                // Urutkan berdasarkan key (opsional, untuk tampilan yang rapi)
-                                ksort($locationTypes);
+                                // Buat array dengan value yang bisa di-translate
+                                $translatedTypes = [];
+                                foreach ($locationTypes as $type) {
+                                    $translatedTypes[$type] = __($type); // Akan mengambil dari resources/lang/{locale}.json jika ada
+                                }
 
-                                return $locationTypes;
+                                // Tambahkan opsi 'all'
+                                $translatedTypes['all'] = __('Semua Jenis Lokasi (all)');
+
+                                // Urutkan berdasarkan key
+                                ksort($translatedTypes);
+
+                                return $translatedTypes;
                             })
                             ->searchable()
                             ->helperText(__('Untuk jenis lokasi mana indikator ini berlaku.')),
@@ -94,6 +100,7 @@ class IndicatorResource extends Resource
                             ->minValue(0)
                             ->label(__('Bobot Indikator')),
                         Forms\Components\Select::make('scale_type')
+                            ->required()
                             ->label(__('Tipe Skala Penilaian'))
                             ->options([
                                 'Skala 1-2' => __('Skala 1-2'),
